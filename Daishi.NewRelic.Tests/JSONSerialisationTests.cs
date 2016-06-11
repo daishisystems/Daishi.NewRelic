@@ -675,27 +675,33 @@ Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
 
-namespace Daishi.NewRelic
+using System.IO;
+using Jil;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace Daishi.NewRelic.Tests
 {
-    public interface NewRelicInsightsEvent
+    [TestClass]
+    public class JSONSerialisationTests
     {
-        /// <summary>
-        ///     EventType is the New Relic Insights Event Grouping. It determines the
-        ///     database to which the event will persist.
-        /// </summary>
-        /// <remarks>
-        ///     <para>
-        ///         <see cref="EventType" /><c>must</c> be serialised in Camel case, in
-        ///         order to be correctly interpreted by New Relic Insights.
-        ///     </para>
-        ///     <para>
-        ///         Apply the following attribute to the <see cref="EventType" />
-        ///         property in your implementation:
-        ///     </para>
-        ///     <para>
-        ///         <c>[JilDirective(Name = "eventType")]</c>
-        ///     </para>
-        /// </remarks>
-        string EventType { get; set; }
+        [TestMethod]
+        public void JilSerialiserCorrectlyAppliesCasing()
+        {
+            var dummyNewRelicInsightsEvent = new DummyNewRelicInsightsEvent
+            {
+                EventType = "MockEventType"
+            };
+
+            using (var outputter = new StringWriter())
+            {
+                JSON.Serialize(dummyNewRelicInsightsEvent, outputter);
+
+                var serialisedMetadata = outputter.ToString();
+
+                var casingIsCorrectlyApplied = serialisedMetadata.Contains("eventType");
+
+                Assert.IsTrue(casingIsCorrectlyApplied);
+            }
+        }
     }
 }

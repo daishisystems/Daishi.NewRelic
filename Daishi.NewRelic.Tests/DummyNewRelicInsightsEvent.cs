@@ -675,27 +675,37 @@ Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
 
-namespace Daishi.NewRelic
+using Jil;
+
+namespace Daishi.NewRelic.Tests
 {
-    public interface NewRelicInsightsEvent
+    /// <summary>
+    ///     <see cref="DummyNewRelicInsightsEvent" /> is a mock implementation of
+    ///     <see cref="NewRelicInsightsEvent" />, to facilitate unit-testing.
+    /// </summary>
+    internal class DummyNewRelicInsightsEvent : NewRelicInsightsEvent
     {
+
         /// <summary>
         ///     EventType is the New Relic Insights Event Grouping. It determines the
         ///     database to which the event will persist.
         /// </summary>
         /// <remarks>
         ///     <para>
-        ///         <see cref="EventType" /><c>must</c> be serialised in Camel case, in
-        ///         order to be correctly interpreted by New Relic Insights.
+        ///         <see cref="NewRelicInsightsEvent.EventType" /><c>must</c> be serialised
+        ///         in Camel case, in order to be correctly interpreted by New Relic
+        ///         Insights.
         ///     </para>
         ///     <para>
-        ///         Apply the following attribute to the <see cref="EventType" />
+        ///         Apply the following attribute to the
+        ///         <see cref="NewRelicInsightsEvent.EventType" />
         ///         property in your implementation:
         ///     </para>
         ///     <para>
         ///         <c>[JilDirective(Name = "eventType")]</c>
         ///     </para>
         /// </remarks>
-        string EventType { get; set; }
+        [JilDirective(Name = "eventType")]
+        public string EventType { get; set; }
     }
 }
