@@ -681,9 +681,18 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Daishi.NewRelic.Tests
 {
+    /// <summary>
+    ///     <see cref="JSONSerialisationTests" /> ensures that New Relic Insights
+    ///     events are serialised in the correct format, pertaining to New Relic
+    ///     Insights requirements.
+    /// </summary>
     [TestClass]
     public class JSONSerialisationTests
     {
+        /// <summary>
+        ///     <see cref="JilSerialiserCorrectlyAppliesCasing" /> ensures that
+        ///     <see cref="NewRelicInsightsEvent.EventType" /> is serialised in Camel case.
+        /// </summary>
         [TestMethod]
         public void JilSerialiserCorrectlyAppliesCasing()
         {

@@ -684,14 +684,14 @@ namespace Daishi.NewRelic
     /// </summary>
     public class NewRelicInsightsClient
     {
-        public void PublishEvent(NewRelicInsightsEvent newRelicInsightsEvent)
+        public static void PublishNewRelicInsightsEvent(NewRelicInsightsEvent newRelicInsightsEvent,
+            NewRelicInsightsMetadata newRelicInsightsMetadata)
         {
-
-        }
-
-        public void PublishEventAsync()
-        {
-
+            if (string.IsNullOrEmpty(newRelicInsightsMetadata.AccountID))
+            {
+                throw new NewRelicInsightsMetadataException(
+                    "No New Relic Insights Account ID specified.");
+            }
         }
     }
 }

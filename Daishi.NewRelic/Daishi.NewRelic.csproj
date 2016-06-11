@@ -52,6 +52,7 @@
     <Compile Include="NewRelicInsightsClient.cs" />
     <Compile Include="NewRelicInsightsEvent.cs" />
     <Compile Include="NewRelicInsightsMetadata.cs" />
+    <Compile Include="NewRelicInsightsMetadataException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
