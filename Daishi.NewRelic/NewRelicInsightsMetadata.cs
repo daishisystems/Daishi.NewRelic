@@ -693,6 +693,11 @@ namespace Daishi.NewRelic
         /// </summary>
         public string AccountID { get; set; }
 
+        /// <summary>
+        ///     <see cref="APIKey" /> is the API key associated with a New Relic Insights
+        ///     account. It is required as a header in each HTTP request to New Relic
+        ///     Insights.
+        /// </summary>
         public string APIKey { get; set; }
 
         /// <summary>
@@ -702,11 +707,25 @@ namespace Daishi.NewRelic
         public Uri URI { get; set; }
 
         /// <summary>
-        ///     <see cref="Proxy" />, if specified, will incorporate a HTTP proxy when
+        ///     <see cref="WebProxy" />, if specified, will incorporate a HTTP proxy when
         ///     issuing HTTP requests to New Relic Insights.
         /// </summary>
-        public WebProxy Proxy { get; set; }
+        /// <remarks>
+        ///     The feature facilitates connectivity to New Relic Insights, even when
+        ///     internet connectivity is funnelled through a proxy server: e.g, corporate
+        ///     networks.
+        /// </remarks>
+        public WebProxy WebProxy { get; set; }
 
+        /// <summary>
+        ///     <see cref="TimeOutInMilliseconds" /> allows for a non-default HTTP request
+        ///     timeout to New Relic Insights.
+        /// </summary>
+        /// <remarks>
+        ///     This feature is a crumple-zone, ensuring that failed, or slow
+        ///     connectivity to New Relic Insights will not create a bottleneck in
+        ///     consuming systems.
+        /// </remarks>
         public int TimeOutInMilliseconds { get; set; }
     }
 }
