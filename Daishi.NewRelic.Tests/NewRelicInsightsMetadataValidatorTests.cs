@@ -674,42 +674,244 @@ the library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
-using System.Reflection;
-using System.Runtime.InteropServices;
+using System;
+using System.Net;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-// General Information about an assembly is controlled through the following 
-// set of attributes. Change these attribute values to modify the information
-// associated with an assembly.
+// ToDo: Rename NewRelic to NewRelic.Insights
+// ToDo: Add Client with Fluent recurring task. Think about abstracting this for a future blog post:
+// "Caching and persisting monitoring metadata"
+// ToDo: Add Sample App to test Client
+// ToDo: Talk to Colin, Silva, re: deployment
 
-[assembly: AssemblyTitle("Daishi.NewRelic")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Daishi.NewRelic")]
-[assembly: AssemblyCopyright("Copyright ©  2016")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
+namespace Daishi.NewRelic.Tests
+{
+    /// <summary>
+    ///     <see cref="NewRelicInsightsMetadataValidatorTests" /> ensures that events
+    ///     are successfully prepared for publish to New Relic Insights.
+    /// </summary>
+    [TestClass]
+    public class NewRelicInsightsMetadataValidatorTests
+    {
+        /// <summary>
+        ///     <see cref="InvalidAccountIDReturnsException" /> ensures that a
+        ///     <see cref="NewRelicInsightsMetadataException" /> is outputted when an
+        ///     uninitialised instance of <see cref="NewRelicInsightsMetadata" /> is
+        ///     leveraged to publish a <see cref="NewRelicInsightsEvent" /> instance.
+        /// </summary>
+        [TestMethod]
+        public void NullNewRelicInsightsMetadataReturnsException()
+        {
+            NewRelicInsightsMetadataException newRelicInsightsMetadataException;
 
-// Setting ComVisible to false makes the types in this assembly not visible 
-// to COM components.  If you need to access a type in this assembly from 
-// COM, set the ComVisible attribute to true on that type.
+            var newRelicInsightsMetadataIsValid =
+                NewRelicInsightsMetadataValidator.TryValidate(null,
+                    out newRelicInsightsMetadataException);
 
-[assembly: ComVisible(false)]
+            Assert.IsFalse(newRelicInsightsMetadataIsValid);
+            Assert.IsInstanceOfType(newRelicInsightsMetadataException,
+                typeof(NewRelicInsightsMetadataException));
+        }
 
-// The following GUID is for the ID of the typelib if this project is exposed to COM
+        /// <summary>
+        ///     <see cref="InvalidAccountIDReturnsException" /> ensures that a
+        ///     <see cref="NewRelicInsightsMetadataException" /> is outputted when an
+        ///     instance of <see cref="NewRelicInsightsMetadata" />, that contains an
+        ///     invalid
+        ///     <see cref="NewRelicInsightsMetadata.AccountID" />, is leveraged to publish
+        ///     a <see cref="NewRelicInsightsEvent" /> instance.
+        /// </summary>
+        [TestMethod]
+        public void InvalidAccountIDReturnsException()
+        {
+            var newRelicInsightsMetadata = new NewRelicInsightsMetadata();
+            NewRelicInsightsMetadataException newRelicInsightsMetadataException;
 
-[assembly: Guid("02bce6a0-ff01-4880-b9cf-b17a1fcb0922")]
+            var newRelicInsightsMetadataIsValid =
+                NewRelicInsightsMetadataValidator.TryValidate(newRelicInsightsMetadata,
+                    out newRelicInsightsMetadataException);
 
-// Version information for an assembly consists of the following four values:
-//
-//      Major Version
-//      Minor Version 
-//      Build Number
-//      Revision
-//
-// You can specify all the values or you can default the Build and Revision Numbers 
-// by using the '*' as shown below:
-// [assembly: AssemblyVersion("1.0.*")]
+            Assert.IsFalse(newRelicInsightsMetadataIsValid);
+            Assert.IsInstanceOfType(newRelicInsightsMetadataException,
+                typeof(NewRelicInsightsMetadataException));
+        }
 
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+        /// <summary>
+        ///     <see cref="InvalidAPIKeyReturnsException" /> ensures that a
+        ///     <see cref="NewRelicInsightsMetadataException" /> is outputted when an
+        ///     instance of <see cref="NewRelicInsightsMetadata" />, that contains an
+        ///     invalid
+        ///     <see cref="NewRelicInsightsMetadata.APIKey" />, is leveraged to publish a
+        ///     <see cref="NewRelicInsightsEvent" /> instance.
+        /// </summary>
+        [TestMethod]
+        public void InvalidAPIKeyReturnsException()
+        {
+            var newRelicInsightsMetadata = new NewRelicInsightsMetadata
+            {
+                AccountID = "Mock Account ID"
+            };
+
+            NewRelicInsightsMetadataException newRelicInsightsMetadataException;
+
+            var newRelicInsightsMetadataIsValid =
+                NewRelicInsightsMetadataValidator.TryValidate(newRelicInsightsMetadata,
+                    out newRelicInsightsMetadataException);
+
+            Assert.IsFalse(newRelicInsightsMetadataIsValid);
+            Assert.IsInstanceOfType(newRelicInsightsMetadataException,
+                typeof(NewRelicInsightsMetadataException));
+        }
+
+        /// <summary>
+        ///     <see cref="InvalidURIReturnsException" /> ensures that a
+        ///     <see cref="NewRelicInsightsMetadataException" /> is outputted when an
+        ///     instance of <see cref="NewRelicInsightsMetadata" />, that contains an
+        ///     invalid
+        ///     <see cref="NewRelicInsightsMetadata.URI" />, is leveraged to publish a
+        ///     <see cref="NewRelicInsightsEvent" /> instance.
+        /// </summary>
+        [TestMethod]
+        public void InvalidURIReturnsException()
+        {
+            var newRelicInsightsMetadata = new NewRelicInsightsMetadata
+            {
+                AccountID = "Mock Account ID",
+                APIKey = "Mock API key"
+            };
+
+            NewRelicInsightsMetadataException newRelicInsightsMetadataException;
+
+            var newRelicInsightsMetadataIsValid =
+                NewRelicInsightsMetadataValidator.TryValidate(newRelicInsightsMetadata,
+                    out newRelicInsightsMetadataException);
+
+            Assert.IsFalse(newRelicInsightsMetadataIsValid);
+            Assert.IsInstanceOfType(newRelicInsightsMetadataException,
+                typeof(NewRelicInsightsMetadataException));
+        }
+
+        /// <summary>
+        ///     <see cref="WebProxyIsSetWhenUseProxyIsSpecified" /> ensures that a a valid
+        ///     <see cref="WebProxy" /> is instantiated when the
+        ///     <see cref="NewRelicInsightsMetadata.UseWebProxy" /> property is <c>true</c>
+        ///     .
+        /// </summary>
+        [TestMethod]
+        public void WebProxyIsSetWhenUseProxyIsSpecified()
+        {
+            var newRelicInsightsMetadata = new NewRelicInsightsMetadata
+            {
+                AccountID = "Mock Account ID",
+                APIKey = "Mock API key",
+                URI = new Uri("http://localhost"),
+                UseWebProxy = true,
+                WebProxy = new WebProxy()
+            };
+
+            NewRelicInsightsMetadataException newRelicInsightsMetadataException;
+
+            var newRelicInsightsMetadataIsValid =
+                NewRelicInsightsMetadataValidator.TryValidate(newRelicInsightsMetadata,
+                    out newRelicInsightsMetadataException);
+
+            Assert.IsTrue(newRelicInsightsMetadataIsValid);
+            Assert.IsNull(newRelicInsightsMetadataException);
+        }
+
+        /// <summary>
+        ///     <see cref="NullWebProxyReturnsExceptionWhenUseProxyIsSpecified" /> ensures
+        ///     that a
+        ///     <see cref="NewRelicInsightsMetadataException" /> is outputted when an
+        ///     instance of <see cref="NewRelicInsightsMetadata" />, that contains an
+        ///     invalid
+        ///     <see cref="NewRelicInsightsMetadata.WebProxy" />, when
+        ///     <see cref="NewRelicInsightsMetadata.UseWebProxy" /> is <c>true</c>, is
+        ///     leveraged to publish a
+        ///     <see cref="NewRelicInsightsEvent" /> instance.
+        /// </summary>
+        [TestMethod]
+        public void NullWebProxyReturnsExceptionWhenUseProxyIsSpecified()
+        {
+            var newRelicInsightsMetadata = new NewRelicInsightsMetadata
+            {
+                AccountID = "Mock Account ID",
+                APIKey = "Mock API key",
+                URI = new Uri("http://localhost"),
+                UseWebProxy = true
+            };
+
+            NewRelicInsightsMetadataException newRelicInsightsMetadataException;
+
+            var newRelicInsightsMetadataIsValid =
+                NewRelicInsightsMetadataValidator.TryValidate(newRelicInsightsMetadata,
+                    out newRelicInsightsMetadataException);
+
+            Assert.IsFalse(newRelicInsightsMetadataIsValid);
+            Assert.IsInstanceOfType(newRelicInsightsMetadataException,
+                typeof(NewRelicInsightsMetadataException));
+        }
+
+        /// <summary>
+        ///     <see cref="TimeoutIsSetWhenUseNonDefaultTimeoutIsSpecified" /> ensures that
+        ///     a a valid
+        ///     <see cref="TimeSpan" /> is instantiated when the
+        ///     <see cref="NewRelicInsightsMetadata.UseNonDefaultTimeout" /> property is
+        ///     <c>true</c>.
+        /// </summary>
+        [TestMethod]
+        public void TimeoutIsSetWhenUseNonDefaultTimeoutIsSpecified()
+        {
+            var newRelicInsightsMetadata = new NewRelicInsightsMetadata
+            {
+                AccountID = "Mock Account ID",
+                APIKey = "Mock API key",
+                URI = new Uri("http://localhost"),
+                UseNonDefaultTimeout = true,
+                NonDefaultTimeout = new TimeSpan(0, 0, 5)
+            };
+
+            NewRelicInsightsMetadataException newRelicInsightsMetadataException;
+
+            var newRelicInsightsMetadataIsValid =
+                NewRelicInsightsMetadataValidator.TryValidate(newRelicInsightsMetadata,
+                    out newRelicInsightsMetadataException);
+
+            Assert.IsTrue(newRelicInsightsMetadataIsValid);
+            Assert.IsNull(newRelicInsightsMetadataException);
+        }
+
+        /// <summary>
+        ///     <see cref="ZeroTimeoutReturnsExceptionWhenUseNonDefaultTimeoutIsSpecified" />
+        ///     ensures that a
+        ///     <see cref="NewRelicInsightsMetadataException" /> is outputted when an
+        ///     instance of <see cref="NewRelicInsightsMetadata" />, that contains an
+        ///     invalid
+        ///     <see cref="NewRelicInsightsMetadata.Timeout" />, when
+        ///     <see cref="NewRelicInsightsMetadata.UseNonDefaultTimeout" /> is <c>true</c>
+        ///     , is leveraged to publish a
+        ///     <see cref="NewRelicInsightsEvent" /> instance.
+        /// </summary>
+        [TestMethod]
+        public void ZeroTimeoutReturnsExceptionWhenUseNonDefaultTimeoutIsSpecified()
+        {
+            var newRelicInsightsMetadata = new NewRelicInsightsMetadata
+            {
+                AccountID = "Mock Account ID",
+                APIKey = "Mock API key",
+                URI = new Uri("http://localhost"),
+                UseNonDefaultTimeout = true
+            };
+
+            NewRelicInsightsMetadataException newRelicInsightsMetadataException;
+
+            var newRelicInsightsMetadataIsValid =
+                NewRelicInsightsMetadataValidator.TryValidate(newRelicInsightsMetadata,
+                    out newRelicInsightsMetadataException);
+
+            Assert.IsFalse(newRelicInsightsMetadataIsValid);
+            Assert.IsInstanceOfType(newRelicInsightsMetadataException,
+                typeof(NewRelicInsightsMetadataException));
+        }
+    }
+}

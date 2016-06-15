@@ -674,42 +674,54 @@ the library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
-using System.Reflection;
-using System.Runtime.InteropServices;
+using System.Net.Http.Headers;
 
-// General Information about an assembly is controlled through the following 
-// set of attributes. Change these attribute values to modify the information
-// associated with an assembly.
+namespace Daishi.NewRelic
+{
+    //ToDo: Move this into a generic HTTP-helper style project.
 
-[assembly: AssemblyTitle("Daishi.NewRelic")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Daishi.NewRelic")]
-[assembly: AssemblyCopyright("Copyright ©  2016")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
+    /// <summary>
+    ///     <see cref="NewRelicInsightsCustomHttpHeaderInjecter" />" /> provides a
+    ///     means of injecting New Relic Insights API key metadata into a HTTP request
+    ///     header.
+    /// </summary>
+    public static class NewRelicInsightsCustomHttpHeaderInjecter
+    {
+        /// <summary>
+        ///     <see cref="TryInjectAPIKey" /> attempts to inject a custom HTTP header,
+        ///     composed of <see cref="headerName" /> and <see cref="headerValue" />, into
+        ///     <see cref="httpRequestHeaders" />. If successful, the New Relic Insights
+        ///     custom HTTP header will be added to <see cref="httpRequestHeaders" />.
+        /// </summary>
+        /// <param name="headerName">The name of the custom HTTP header.</param>
+        /// <param name="headerValue">The value of the custom HTTP header.</param>
+        /// <param name="httpRequestHeaders">
+        ///     The <see cref="HttpRequestHeaders" /> to which
+        ///     the custom HTTP header should be added.
+        /// </param>
+        /// <param name="newRelicInsightsMetadataException">
+        ///     A
+        ///     <see cref="NewRelicInsightsMetadataException" /> returned if the New Relic
+        ///     custom HTTP header cannot be added.
+        /// </param>
+        /// <returns>
+        ///     <c>True</c>, if the custom HTTP header is successfully added. Otherwise,
+        ///     false.
+        /// </returns>
+        public static bool TryInjectAPIKey(string headerName, string headerValue,
+            HttpRequestHeaders httpRequestHeaders,
+            out NewRelicInsightsMetadataException newRelicInsightsMetadataException)
+        {
+            newRelicInsightsMetadataException = null;
 
-// Setting ComVisible to false makes the types in this assembly not visible 
-// to COM components.  If you need to access a type in this assembly from 
-// COM, set the ComVisible attribute to true on that type.
+            var apiKeyIsAdded = httpRequestHeaders.TryAddWithoutValidation(headerName, headerValue);
 
-[assembly: ComVisible(false)]
+            if (apiKeyIsAdded) return true;
 
-// The following GUID is for the ID of the typelib if this project is exposed to COM
+            newRelicInsightsMetadataException = new NewRelicInsightsMetadataException(
+                "The New Relic Insights API key does not conform to a valid HTTP header format.");
 
-[assembly: Guid("02bce6a0-ff01-4880-b9cf-b17a1fcb0922")]
-
-// Version information for an assembly consists of the following four values:
-//
-//      Major Version
-//      Minor Version 
-//      Build Number
-//      Revision
-//
-// You can specify all the values or you can default the Build and Revision Numbers 
-// by using the '*' as shown below:
-// [assembly: AssemblyVersion("1.0.*")]
-
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+            return false;
+        }
+    }
+}

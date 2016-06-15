@@ -674,42 +674,62 @@ the library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
-using System.Reflection;
-using System.Runtime.InteropServices;
+using System.Net.Http;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-// General Information about an assembly is controlled through the following 
-// set of attributes. Change these attribute values to modify the information
-// associated with an assembly.
+namespace Daishi.NewRelic.Tests
+{
+    // ToDo: I may have assigned "IsInstanceOf" in Aegis, whereas I should have leveraged ISNotNull.
 
-[assembly: AssemblyTitle("Daishi.NewRelic")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Daishi.NewRelic")]
-[assembly: AssemblyCopyright("Copyright ©  2016")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
+    /// <summary>
+    ///     <see cref="NewRelicInsightsCustomHttpHeaderInjecterTests" /> ensures that
+    ///     logic pertaining to <see cref="NewRelicInsightsCustomHttpHeaderInjecter" />
+    ///     is executed correctly.
+    /// </summary>
+    [TestClass]
+    public class NewRelicInsightsCustomHttpHeaderInjecterTests
+    {
+        /// <summary>
+        ///     <see cref="CorrectlyFormattedAPIKeyHttpHeaderIsAddedSuccessfully" />
+        ///     ensures that a correctly-formatted New Relic Insights API key HTTP header
+        ///     is successfully added to a collection of HTTP headers.
+        /// </summary>
+        [TestMethod]
+        public void CorrectlyFormattedAPIKeyHttpHeaderIsAddedSuccessfully()
+        {
+            using (var httpClient = new HttpClient())
+            {
+                NewRelicInsightsMetadataException newRelicInsightsMetadataException;
 
-// Setting ComVisible to false makes the types in this assembly not visible 
-// to COM components.  If you need to access a type in this assembly from 
-// COM, set the ComVisible attribute to true on that type.
+                var apiKeyIsAdded = NewRelicInsightsCustomHttpHeaderInjecter.TryInjectAPIKey(
+                    "X-Insert-Key",
+                    "8SxYVNy5QZRcObSbbnQRG9btz07EL0Vc",
+                    httpClient.DefaultRequestHeaders, out newRelicInsightsMetadataException);
 
-[assembly: ComVisible(false)]
+                Assert.IsTrue(apiKeyIsAdded);
+            }
+        }
 
-// The following GUID is for the ID of the typelib if this project is exposed to COM
+        /// <summary>
+        ///     <see cref="IncorrectlyFormattedAPIKeyHttpHeaderIsNotAddedSuccessfully" />
+        ///     ensures that an incorrectly-formatted New Relic Insights API key HTTP
+        ///     header is not added to a collection of HTTP headers.
+        /// </summary>
+        [TestMethod]
+        public void IncorrectlyFormattedAPIKeyHttpHeaderIsNotAddedSuccessfully()
+        {
+            using (var httpClient = new HttpClient())
+            {
+                NewRelicInsightsMetadataException newRelicInsightsMetadataException;
 
-[assembly: Guid("02bce6a0-ff01-4880-b9cf-b17a1fcb0922")]
+                var apiKeyIsAdded = NewRelicInsightsCustomHttpHeaderInjecter.TryInjectAPIKey(
+                    string.Empty,
+                    "8SxYVNy5QZRcObSbbnQRG9btz07EL0Vc",
+                    httpClient.DefaultRequestHeaders, out newRelicInsightsMetadataException);
 
-// Version information for an assembly consists of the following four values:
-//
-//      Major Version
-//      Minor Version 
-//      Build Number
-//      Revision
-//
-// You can specify all the values or you can default the Build and Revision Numbers 
-// by using the '*' as shown below:
-// [assembly: AssemblyVersion("1.0.*")]
-
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+                Assert.IsFalse(apiKeyIsAdded);
+                Assert.IsNotNull(newRelicInsightsMetadataException);
+            }
+        }
+    }
+}

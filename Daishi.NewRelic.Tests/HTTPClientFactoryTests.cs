@@ -674,42 +674,82 @@ the library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
-using System.Reflection;
-using System.Runtime.InteropServices;
+using System;
+using System.Net;
+using System.Net.Http;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-// General Information about an assembly is controlled through the following 
-// set of attributes. Change these attribute values to modify the information
-// associated with an assembly.
+namespace Daishi.NewRelic.Tests
+{
+    /// <summary>
+    ///     <see cref="HttpClientFactoryTests" /> ensures that logic pertaining to
+    ///     <see cref="HttpClientFactory" /> executes correctly.
+    /// </summary>
+    [TestClass]
+    public class HttpClientFactoryTests
+    {
+        /// <summary>
+        ///     <see cref="HttpClientWithProxyIsCreated" /> ensures that a
+        ///     <see cref="HttpClient" /> instance is created, with the specified proxy
+        ///     server.
+        /// </summary>
+        [TestMethod]
+        public void HttpClientWithProxyIsCreated()
+        {
+            var newRelicInsightsMetadata = new NewRelicInsightsMetadata
+            {
+                UseWebProxy = true,
+                WebProxy = new WebProxy(new Uri("http://localhost"))
+            };
 
-[assembly: AssemblyTitle("Daishi.NewRelic")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Daishi.NewRelic")]
-[assembly: AssemblyCopyright("Copyright ©  2016")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
+            HttpClientHandler httpClientHandler;
 
-// Setting ComVisible to false makes the types in this assembly not visible 
-// to COM components.  If you need to access a type in this assembly from 
-// COM, set the ComVisible attribute to true on that type.
+            var httpClientFactory = new HttpClientFactory();
+            httpClientFactory.Create(newRelicInsightsMetadata, out httpClientHandler);
 
-[assembly: ComVisible(false)]
+            Assert.IsTrue(httpClientHandler.UseProxy);
+            Assert.AreEqual(newRelicInsightsMetadata.WebProxy, httpClientHandler.Proxy);
+        }
 
-// The following GUID is for the ID of the typelib if this project is exposed to COM
+        /// <summary>
+        ///     <see cref="HttpClientWithoutProxyIsCreated" /> ensures that a
+        ///     <see cref="HttpClient" /> instance is created, with no specified proxy
+        ///     server.
+        /// </summary>
+        [TestMethod]
+        public void HttpClientWithoutProxyIsCreated()
+        {
+            var newRelicInsightsMetadata = new NewRelicInsightsMetadata();
 
-[assembly: Guid("02bce6a0-ff01-4880-b9cf-b17a1fcb0922")]
+            HttpClientHandler httpClientHandler;
 
-// Version information for an assembly consists of the following four values:
-//
-//      Major Version
-//      Minor Version 
-//      Build Number
-//      Revision
-//
-// You can specify all the values or you can default the Build and Revision Numbers 
-// by using the '*' as shown below:
-// [assembly: AssemblyVersion("1.0.*")]
+            var httpClientFactory = new HttpClientFactory();
+            httpClientFactory.Create(newRelicInsightsMetadata, out httpClientHandler);
 
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+            Assert.IsNull(httpClientHandler);
+            Assert.IsNotNull(newRelicInsightsMetadata);
+        }
+
+        /// <summary>
+        ///     <see cref="HttpClientWithNonDefaultTimeoutIsCreated" /> ensures that a
+        ///     <see cref="HttpClient" /> instance is created, with a non-default timeout.
+        /// </summary>
+        [TestMethod]
+        public void HttpClientWithNonDefaultTimeoutIsCreated()
+        {
+            var newRelicInsightsMetadata = new NewRelicInsightsMetadata
+            {
+                UseNonDefaultTimeout = true,
+                NonDefaultTimeout = new TimeSpan(0, 0, 5)
+            };
+
+            HttpClientHandler httpClientHandler;
+
+            var httpClientFactory = new HttpClientFactory();
+            var httpClient = httpClientFactory.Create(newRelicInsightsMetadata,
+                out httpClientHandler);
+
+            Assert.AreEqual((object) newRelicInsightsMetadata.NonDefaultTimeout, httpClient.Timeout);
+        }
+    }
+}

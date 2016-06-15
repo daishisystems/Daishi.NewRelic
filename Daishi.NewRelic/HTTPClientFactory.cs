@@ -674,42 +674,63 @@ the library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
-using System.Reflection;
-using System.Runtime.InteropServices;
+using System.Net.Http;
 
-// General Information about an assembly is controlled through the following 
-// set of attributes. Change these attribute values to modify the information
-// associated with an assembly.
+namespace Daishi.NewRelic
+{
+    /// <summary>
+    ///     <see cref="HttpClientFactory" /> creates an instance of
+    ///     <see cref="HttpClient" />, based on an instance of
+    ///     <see cref="NewRelicInsightsMetadata" />.
+    /// </summary>
+    public class HttpClientFactory
+    {
+        /// <summary>
+        ///     <see cref="Create" /> creates an instance of
+        ///     <see cref="HttpClient" />, based on an instance of
+        ///     <see cref="NewRelicInsightsMetadata" />.
+        /// </summary>
+        /// <param name="newRelicInsightsMetadata">
+        ///     The
+        ///     <see cref="NewRelicInsightsMetadata" /> used to create a
+        ///     <see cref="HttpClient" /> instance.
+        /// </param>
+        /// <param name="httpClientHandler">
+        ///     The <see cref="HttpClientHandler" /> that acts
+        ///     as an intermediary between <see cref="HttpClient" /> and
+        ///     <see cref="NewRelicInsightsMetadata" />, during creation of a
+        ///     <see cref="HttpClient" /> instance.
+        /// </param>
+        /// <returns>
+        ///     A <see cref="HttpClient" />, based on
+        ///     <see cref="NewRelicInsightsMetadata" />.
+        /// </returns>
+        public HttpClient Create(NewRelicInsightsMetadata newRelicInsightsMetadata,
+            out HttpClientHandler httpClientHandler)
+        {
+            HttpClient httpClient;
 
-[assembly: AssemblyTitle("Daishi.NewRelic")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Daishi.NewRelic")]
-[assembly: AssemblyCopyright("Copyright ©  2016")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
+            if (newRelicInsightsMetadata.UseWebProxy)
+            {
+                httpClientHandler = new HttpClientHandler
+                {
+                    UseProxy = true,
+                    Proxy = newRelicInsightsMetadata.WebProxy
+                };
+                httpClient = new HttpClient(httpClientHandler);
+            }
+            else
+            {
+                httpClientHandler = null;
+                httpClient = new HttpClient();
+            }
 
-// Setting ComVisible to false makes the types in this assembly not visible 
-// to COM components.  If you need to access a type in this assembly from 
-// COM, set the ComVisible attribute to true on that type.
+            if (newRelicInsightsMetadata.UseNonDefaultTimeout)
+            {
+                httpClient.Timeout = newRelicInsightsMetadata.NonDefaultTimeout;
+            }
 
-[assembly: ComVisible(false)]
-
-// The following GUID is for the ID of the typelib if this project is exposed to COM
-
-[assembly: Guid("02bce6a0-ff01-4880-b9cf-b17a1fcb0922")]
-
-// Version information for an assembly consists of the following four values:
-//
-//      Major Version
-//      Minor Version 
-//      Build Number
-//      Revision
-//
-// You can specify all the values or you can default the Build and Revision Numbers 
-// by using the '*' as shown below:
-// [assembly: AssemblyVersion("1.0.*")]
-
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+            return httpClient;
+        }
+    }
+}

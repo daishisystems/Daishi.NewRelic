@@ -674,7 +674,6 @@ the library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
-
 using System;
 using System.Net;
 
@@ -718,7 +717,14 @@ namespace Daishi.NewRelic
         public WebProxy WebProxy { get; set; }
 
         /// <summary>
-        ///     <see cref="TimeOutInMilliseconds" /> allows for a non-default HTTP request
+        ///     <see cref="UseWebProxy" />, when <c>true</c>, instructs leveraging
+        ///     components to implement the <see cref="WebProxy" /> property when issuing
+        ///     HTTP requests to New Relic Insights.
+        /// </summary>
+        public bool UseWebProxy { get; set; }
+
+        /// <summary>
+        ///     <see cref="NonDefaultTimeout" /> allows for a non-default HTTP request
         ///     timeout to New Relic Insights.
         /// </summary>
         /// <remarks>
@@ -726,6 +732,13 @@ namespace Daishi.NewRelic
         ///     connectivity to New Relic Insights will not create a bottleneck in
         ///     consuming systems.
         /// </remarks>
-        public int TimeOutInMilliseconds { get; set; }
+        public TimeSpan NonDefaultTimeout { get; set; }
+
+        /// <summary>
+        ///     <see cref="UseNonDefaultTimeout" />, when <c>true</c>, instructs leveraging
+        ///     components to implement the <see cref="NonDefaultTimeout" /> property when
+        ///     issuing HTTP requests to New Relic Insights.
+        /// </summary>
+        public bool UseNonDefaultTimeout { get; set; }
     }
 }

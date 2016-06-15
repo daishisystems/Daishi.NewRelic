@@ -674,7 +674,6 @@ the library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
-
 using System.IO;
 using Jil;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -701,11 +700,11 @@ namespace Daishi.NewRelic.Tests
                 EventType = "MockEventType"
             };
 
-            using (var outputter = new StringWriter())
+            using (var stringWriter = new StringWriter())
             {
-                JSON.Serialize(dummyNewRelicInsightsEvent, outputter);
+                JSON.Serialize(dummyNewRelicInsightsEvent, stringWriter);
 
-                var serialisedMetadata = outputter.ToString();
+                var serialisedMetadata = stringWriter.ToString();
 
                 var casingIsCorrectlyApplied = serialisedMetadata.Contains("eventType");
 

@@ -674,23 +674,98 @@ the library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
+using System.Collections.Generic;
+using System.IO;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+using Jil;
 
 namespace Daishi.NewRelic
 {
-    /// <summary>
-    ///     <see cref="NewRelicInsightsClient" /> is a New Relic Insights client
-    ///     component, that allows consuming systems to publish events to New Relic
-    ///     Insights.
-    /// </summary>
     public class NewRelicInsightsClient
     {
-        public static void PublishNewRelicInsightsEvent(NewRelicInsightsEvent newRelicInsightsEvent,
-            NewRelicInsightsMetadata newRelicInsightsMetadata)
+        public static void UploadEvents<T>(IEnumerable<T> newRelicInsightsEvents,
+            HttpClientFactory httpClientFactory,
+            NewRelicInsightsMetadata newRelicInsightsMetadata) where T : NewRelicInsightsEvent
         {
-            if (string.IsNullOrEmpty(newRelicInsightsMetadata.AccountID))
+            NewRelicInsightsMetadataException newRelicInsightsMetadataException;
+
+            var newRelicInsightsMetadataIsValid =
+                NewRelicInsightsMetadataValidator.TryValidate(newRelicInsightsMetadata,
+                    out newRelicInsightsMetadataException);
+
+            if (!newRelicInsightsMetadataIsValid)
             {
-                throw new NewRelicInsightsMetadataException(
-                    "No New Relic Insights Account ID specified.");
+                throw newRelicInsightsMetadataException;
+            }
+
+            HttpClientHandler httpClientHandler;
+
+            using (var httpClient = httpClientFactory.Create(newRelicInsightsMetadata,
+                out httpClientHandler))
+            {
+                httpClient.DefaultRequestHeaders.Accept.Clear();
+
+                httpClient.DefaultRequestHeaders.Accept.Add(
+                    new MediaTypeWithQualityHeaderValue("application/json"));
+
+                var apiKeyHeaderIsAdded = NewRelicInsightsCustomHttpHeaderInjecter.TryInjectAPIKey(
+                    "X-Insert-Key",
+                    newRelicInsightsMetadata.APIKey,
+                    httpClient.DefaultRequestHeaders,
+                    out newRelicInsightsMetadataException);
+
+                if (!apiKeyHeaderIsAdded) throw newRelicInsightsMetadataException;
+
+                StringWriter stringWriter;
+                HttpResponseMessage httpResponseMessage;
+
+                using (stringWriter = new StringWriter())
+                {
+                    JSON.Serialize(newRelicInsightsEvents, stringWriter);
+
+                    httpResponseMessage = httpClient.PostAsync(
+                        string.Concat(
+                            newRelicInsightsMetadata.URI, "/",
+                            newRelicInsightsMetadata.AccountID,
+                            "/events"),
+                        new StringContent(
+                            stringWriter.ToString(),
+                            Encoding.UTF8,
+                            "application/json")
+                        ).Result;
+                }
+
+                var newRelicResponseMetadata =
+                    httpResponseMessage.Content.ReadAsStringAsync().Result;
+
+                if (httpResponseMessage.IsSuccessStatusCode)
+                {
+                    using (var reader = new StringReader(newRelicResponseMetadata))
+                    {
+                        var newRelicInsightsSuccessfulResponse =
+                            JSON.Deserialize<NewRelicInsightsSuccessfulResponse>(reader.ReadToEnd());
+
+                        if (!newRelicInsightsSuccessfulResponse.Success)
+                        {
+                            throw new NewRelicInsightsMetadataException(
+                                "An error occurred uploading events to New Relic Insights");
+                        }
+                    }
+
+                }
+                else
+                {
+                    using (var reader = new StringReader(newRelicResponseMetadata))
+                    {
+                        var newRelicInsightsFailedResponse =
+                            JSON.Deserialize<NewRelicInsightsFailedResponse>(reader.ReadToEnd());
+
+                        throw new NewRelicInsightsMetadataException(
+                            newRelicInsightsFailedResponse.Error);
+                    }
+                }
             }
         }
     }

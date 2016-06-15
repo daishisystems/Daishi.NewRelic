@@ -674,42 +674,96 @@ the library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
-using System.Reflection;
-using System.Runtime.InteropServices;
+using System;
 
-// General Information about an assembly is controlled through the following 
-// set of attributes. Change these attribute values to modify the information
-// associated with an assembly.
+namespace Daishi.NewRelic
+{
+    /// <summary>
+    ///     <see cref="NewRelicInsightsMetadataValidator" /> validates and instance of
+    ///     <see cref="NewRelicInsightsMetadata" />, ensuring that relevant properties
+    ///     are instantiated correctly.
+    /// </summary>
+    public class NewRelicInsightsMetadataValidator
+    {
+        /// <summary>
+        ///     <see cref="TryValidate" /> ensures that
+        ///     <see cref="newRelicInsightsMetadata" />
+        ///     is instantiated correctly. If any <see cref="NewRelicInsightsMetadata" />
+        ///     properties are not instantiated correctly, the method returns <c>false</c>,
+        ///     and outputs a <see cref="NewRelicInsightsMetadataException" />.
+        /// </summary>
+        /// <param name="newRelicInsightsMetadata">
+        ///     The
+        ///     <see cref="NewRelicInsightsMetadata" /> instance to validate.
+        /// </param>
+        /// <param name="newRelicInsightsMetadataException">
+        ///     A
+        ///     <see cref="NewRelicInsightsMetadataException" />, returned if any
+        ///     <see cref="NewRelicInsightsMetadata" /> properties are not instantiated
+        ///     correctly.
+        /// </param>
+        /// <returns>
+        ///     <c>True</c> if all <see cref="newRelicInsightsMetadata" /> properties are
+        ///     instantiated correctly.
+        /// </returns>
+        public static bool TryValidate(NewRelicInsightsMetadata newRelicInsightsMetadata,
+            out NewRelicInsightsMetadataException newRelicInsightsMetadataException)
+        {
+            newRelicInsightsMetadataException = null;
 
-[assembly: AssemblyTitle("Daishi.NewRelic")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Daishi.NewRelic")]
-[assembly: AssemblyCopyright("Copyright ©  2016")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
+            if (newRelicInsightsMetadata == null)
+            {
+                newRelicInsightsMetadataException =
+                    new NewRelicInsightsMetadataException(
+                        "New Relic Insights metadata not specified.");
 
-// Setting ComVisible to false makes the types in this assembly not visible 
-// to COM components.  If you need to access a type in this assembly from 
-// COM, set the ComVisible attribute to true on that type.
+                return false;
+            }
 
-[assembly: ComVisible(false)]
+            if (string.IsNullOrEmpty(newRelicInsightsMetadata.AccountID))
+            {
+                newRelicInsightsMetadataException =
+                    new NewRelicInsightsMetadataException("Invalid Account ID.");
 
-// The following GUID is for the ID of the typelib if this project is exposed to COM
+                return false;
+            }
 
-[assembly: Guid("02bce6a0-ff01-4880-b9cf-b17a1fcb0922")]
+            if (string.IsNullOrEmpty(newRelicInsightsMetadata.APIKey))
+            {
+                newRelicInsightsMetadataException =
+                    new NewRelicInsightsMetadataException("Invalid API key.");
 
-// Version information for an assembly consists of the following four values:
-//
-//      Major Version
-//      Minor Version 
-//      Build Number
-//      Revision
-//
-// You can specify all the values or you can default the Build and Revision Numbers 
-// by using the '*' as shown below:
-// [assembly: AssemblyVersion("1.0.*")]
+                return false;
+            }
 
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+            if (newRelicInsightsMetadata.URI == null)
+            {
+                newRelicInsightsMetadataException =
+                    new NewRelicInsightsMetadataException("URI not specified.");
+
+                return false;
+            }
+
+            if (newRelicInsightsMetadata.UseWebProxy && newRelicInsightsMetadata.WebProxy == null)
+            {
+                newRelicInsightsMetadataException =
+                    new NewRelicInsightsMetadataException(
+                        "UseWebProxy is true, but no proxy is specified.");
+
+                return false;
+            }
+
+            if (newRelicInsightsMetadata.UseNonDefaultTimeout &&
+                newRelicInsightsMetadata.NonDefaultTimeout == TimeSpan.Zero)
+            {
+                newRelicInsightsMetadataException =
+                    new NewRelicInsightsMetadataException(
+                        "UseNonDefaultTimeout is true, but no timeout is specified.");
+
+                return false;
+            }
+
+            return true;
+        }
+    }
+}
