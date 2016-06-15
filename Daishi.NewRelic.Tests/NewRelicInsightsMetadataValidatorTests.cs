@@ -680,9 +680,6 @@ using System.Net;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 // ToDo: Rename NewRelic to NewRelic.Insights
-// ToDo: Add Client with Fluent recurring task. Think about abstracting this for a future blog post:
-// "Caching and persisting monitoring metadata"
-// ToDo: Talk to Colin, Silva, re: deployment
 
 namespace Daishi.NewRelic.Tests
 {
