@@ -48,12 +48,24 @@ namespace Daishi.NewRelic.Tests
         }
 
         /// <summary>
-        ///     <see cref="CustomRecurringTaskNameIsAssignedIfOneIsNotProvided" /> ensures
-        ///     that a custom <see cref="NewRelicInsightsClient.RecurringTaskName" /> is
-        ///     assigned, when provided.
+        ///     <see cref="DefaultCacheUploadLimitIsAssignedIfOneIsNotProvided" />
+        ///     ensures that a default
+        ///     <see cref="NewRelicInsightsClient.CacheUploadLimit" />
+        ///     is assigned, if one is not provided.
         /// </summary>
         [TestMethod]
-        public void CustomRecurringTaskNameIsAssignedIfOneIsNotProvided()
+        public void DefaultCacheUploadLimitIsAssignedIfOneIsNotProvided()
+        {
+            Assert.AreEqual(1000, NewRelicInsightsClient.Instance.CacheUploadLimit);
+        }
+
+        /// <summary>
+        ///     <see cref="CustomRecurringTaskNameIsAssignedIfProvided" /> ensures that a
+        ///     custom <see cref="NewRelicInsightsClient.RecurringTaskName" /> is assigned,
+        ///     when provided.
+        /// </summary>
+        [TestMethod]
+        public void CustomRecurringTaskNameIsAssignedIfProvided()
         {
             NewRelicInsightsClient.Instance.RecurringTaskName = "Custom";
 
@@ -61,17 +73,45 @@ namespace Daishi.NewRelic.Tests
         }
 
         /// <summary>
-        ///     <see cref="CustomRecurringTaskIntervalIsAssignedIfOneIsNotProvided" />
+        ///     <see cref="CustomRecurringTaskIntervalIsAssignedIfProvided" />
         ///     ensures that a custom
         ///     <see cref="NewRelicInsightsClient.RecurringTaskInterval" />
         ///     is assigned, when provided.
         /// </summary>
         [TestMethod]
-        public void CustomRecurringTaskIntervalIsAssignedIfOneIsNotProvided()
+        public void CustomRecurringTaskIntervalIsAssignedIfProvided()
         {
             NewRelicInsightsClient.Instance.RecurringTaskInterval = 5;
 
             Assert.AreEqual(5, NewRelicInsightsClient.Instance.RecurringTaskInterval);
+        }
+
+        /// <summary>
+        ///     <see cref="CustomCacheUploadLimitIsAssignedIfProvided" />
+        ///     ensures that a custom
+        ///     <see cref="NewRelicInsightsClient.CacheUploadLimit" />
+        ///     is assigned, when provided.
+        /// </summary>
+        [TestMethod]
+        public void CustomCacheUploadLimitIsAssignedIfProvided()
+        {
+            NewRelicInsightsClient.Instance.CacheUploadLimit = 2000;
+
+            Assert.AreEqual(2000, NewRelicInsightsClient.Instance.CacheUploadLimit);
+        }
+
+        /// <summary>
+        ///     <see cref="DefaultCacheUploadLimitIsAssignedIfInvalid" />
+        ///     ensures that a default
+        ///     <see cref="NewRelicInsightsClient.CacheUploadLimit" />
+        ///     is assigned, if the specified value is invalid.
+        /// </summary>
+        [TestMethod]
+        public void DefaultCacheUploadLimitIsAssignedIfInvalid()
+        {
+            NewRelicInsightsClient.Instance.CacheUploadLimit = -1;
+
+            Assert.AreEqual(1000, NewRelicInsightsClient.Instance.CacheUploadLimit);
         }
     }
 }

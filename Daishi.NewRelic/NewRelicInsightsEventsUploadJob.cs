@@ -29,7 +29,7 @@ namespace Daishi.NewRelic
 
                 try
                 {
-                    
+
                 }
                 catch (Exception)
                 {

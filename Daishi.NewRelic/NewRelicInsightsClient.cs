@@ -699,6 +699,7 @@ namespace Daishi.NewRelic
     /// </summary>
     public class NewRelicInsightsClient
     {
+        private int _cacheUploadLimit;
         private volatile bool _hasStarted;
         private int _recurringTaskInterval;
         private string _recurringTaskName;
@@ -710,7 +711,7 @@ namespace Daishi.NewRelic
 
         private NewRelicInsightsClient()
         {
-            NewRelicInsightsEvents = new ConcurrentBag<NewRelicInsightsEvent>();
+            NewRelicInsightsEvents = new ConcurrentQueue<NewRelicInsightsEvent>();
         }
 
         public static NewRelicInsightsClient Instance { get; } = new NewRelicInsightsClient();
@@ -719,7 +720,7 @@ namespace Daishi.NewRelic
         ///     <see cref="NewRelicInsightsEvents" /> is a collection of
         ///     <see cref="NewRelicInsightsEvent" /> instances.
         /// </summary>
-        public ConcurrentBag<NewRelicInsightsEvent> NewRelicInsightsEvents { get; }
+        public ConcurrentQueue<NewRelicInsightsEvent> NewRelicInsightsEvents { get; }
 
         /// <summary>
         ///     <see cref="HasStarted" /> returns <c>true</c> if the recurring upload job
@@ -732,7 +733,7 @@ namespace Daishi.NewRelic
         ///     recurring task that continously uploads
         ///     <see cref="NewRelicInsightsEvent" /> instances to New Relic Insights.
         /// </summary>
-        /// <remarks>A default name is assigned, if one is not provided.</remarks>
+        /// <remarks>A default name is assigned, if one is not specified.</remarks>
         public string RecurringTaskName {
             get
             {
@@ -748,10 +749,21 @@ namespace Daishi.NewRelic
         ///     task that continously uploads <see cref="NewRelicInsightsEvent" />
         ///     instances to New Relic Insights is executed.
         /// </summary>
-        /// <remarks>A default interval is provided, if one is not provided.</remarks>
+        /// <remarks>A default interval is provided, if one is not specified.</remarks>
         public int RecurringTaskInterval {
             get { return _recurringTaskInterval > 0 ? _recurringTaskInterval : 1; }
             set { _recurringTaskInterval = value; }
+        }
+
+        /// <summary>
+        ///     <see cref="CacheUploadLimit" /> is the maximum numner of
+        ///     <see cref="NewRelicInsightsEvent" /> instances that will be removed and
+        ///     uploaded during the recurring upload job.
+        /// </summary>
+        /// <remarks>A default limit is provided, if one is not specified.</remarks>
+        public int CacheUploadLimit {
+            get { return _cacheUploadLimit <= 0 ? 1000 : _cacheUploadLimit; }
+            set { _cacheUploadLimit = value >= 0 ? value : 1000; }
         }
 
         /// <summary>
@@ -765,7 +777,7 @@ namespace Daishi.NewRelic
         /// </param>
         public void AddNewRelicInsightEvent(NewRelicInsightsEvent newRelicInsightsEvent)
         {
-            NewRelicInsightsEvents.Add(newRelicInsightsEvent);
+            NewRelicInsightsEvents.Enqueue(newRelicInsightsEvent);
         }
 
         /// <summary>
