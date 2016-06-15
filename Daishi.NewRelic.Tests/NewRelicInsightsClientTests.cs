@@ -23,5 +23,55 @@ namespace Daishi.NewRelic.Tests
 
             Assert.AreEqual(1, NewRelicInsightsClient.Instance.NewRelicInsightsEvents.Count);
         }
+
+        /// <summary>
+        ///     <see cref="DefaultRecurringTaskNameIsAssignedIfOneIsNotProvided" /> ensures
+        ///     that a default <see cref="NewRelicInsightsClient.RecurringTaskName" /> is
+        ///     assigned, if one is not provided.
+        /// </summary>
+        [TestMethod]
+        public void DefaultRecurringTaskNameIsAssignedIfOneIsNotProvided()
+        {
+            Assert.AreEqual("GetBlackListJob", NewRelicInsightsClient.Instance.RecurringTaskName);
+        }
+
+        /// <summary>
+        ///     <see cref="DefaultRecurringTaskIntervalIsAssignedIfOneIsNotProvided" />
+        ///     ensures that a default
+        ///     <see cref="NewRelicInsightsClient.RecurringTaskInterval" />
+        ///     is assigned, if one is not provided.
+        /// </summary>
+        [TestMethod]
+        public void DefaultRecurringTaskIntervalIsAssignedIfOneIsNotProvided()
+        {
+            Assert.AreEqual(1, NewRelicInsightsClient.Instance.RecurringTaskInterval);
+        }
+
+        /// <summary>
+        ///     <see cref="CustomRecurringTaskNameIsAssignedIfOneIsNotProvided" /> ensures
+        ///     that a custom <see cref="NewRelicInsightsClient.RecurringTaskName" /> is
+        ///     assigned, when provided.
+        /// </summary>
+        [TestMethod]
+        public void CustomRecurringTaskNameIsAssignedIfOneIsNotProvided()
+        {
+            NewRelicInsightsClient.Instance.RecurringTaskName = "Custom";
+
+            Assert.AreEqual("Custom", NewRelicInsightsClient.Instance.RecurringTaskName);
+        }
+
+        /// <summary>
+        ///     <see cref="CustomRecurringTaskIntervalIsAssignedIfOneIsNotProvided" />
+        ///     ensures that a custom
+        ///     <see cref="NewRelicInsightsClient.RecurringTaskInterval" />
+        ///     is assigned, when provided.
+        /// </summary>
+        [TestMethod]
+        public void CustomRecurringTaskIntervalIsAssignedIfOneIsNotProvided()
+        {
+            NewRelicInsightsClient.Instance.RecurringTaskInterval = 5;
+
+            Assert.AreEqual(5, NewRelicInsightsClient.Instance.RecurringTaskInterval);
+        }
     }
 }

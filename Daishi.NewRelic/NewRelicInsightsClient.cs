@@ -683,6 +683,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using FluentScheduler;
 using Jil;
 
 // ToDo: Add cache
@@ -698,6 +699,9 @@ namespace Daishi.NewRelic
     /// </summary>
     public class NewRelicInsightsClient
     {
+        private volatile bool _hasStarted;
+        private int _recurringTaskInterval;
+        private string _recurringTaskName;
 
         static NewRelicInsightsClient()
         {
@@ -718,6 +722,39 @@ namespace Daishi.NewRelic
         public ConcurrentBag<NewRelicInsightsEvent> NewRelicInsightsEvents { get; }
 
         /// <summary>
+        ///     <see cref="HasStarted" /> returns <c>true</c> if the recurring upload job
+        ///     has started.
+        /// </summary>
+        public bool HasStarted => _hasStarted;
+
+        /// <summary>
+        ///     <see cref="RecurringTaskName" /> is the friendly name assigned to the
+        ///     recurring task that continously uploads
+        ///     <see cref="NewRelicInsightsEvent" /> instances to New Relic Insights.
+        /// </summary>
+        /// <remarks>A default name is assigned, if one is not provided.</remarks>
+        public string RecurringTaskName {
+            get
+            {
+                return string.IsNullOrEmpty(_recurringTaskName)
+                    ? "GetBlackListJob"
+                    : _recurringTaskName;
+            }
+            set { _recurringTaskName = value; }
+        }
+
+        /// <summary>
+        ///     <see cref="RecurringTaskInterval" /> is the interval at which the recurring
+        ///     task that continously uploads <see cref="NewRelicInsightsEvent" />
+        ///     instances to New Relic Insights is executed.
+        /// </summary>
+        /// <remarks>A default interval is provided, if one is not provided.</remarks>
+        public int RecurringTaskInterval {
+            get { return _recurringTaskInterval > 0 ? _recurringTaskInterval : 1; }
+            set { _recurringTaskInterval = value; }
+        }
+
+        /// <summary>
         ///     <see cref="AddNewRelicInsightEvent" /> adds
         ///     <see cref="newRelicInsightsEvent" /> to
         ///     <see cref="NewRelicInsightsEvents" />.
@@ -729,6 +766,28 @@ namespace Daishi.NewRelic
         public void AddNewRelicInsightEvent(NewRelicInsightsEvent newRelicInsightsEvent)
         {
             NewRelicInsightsEvents.Add(newRelicInsightsEvent);
+        }
+
+        /// <summary>
+        ///     <see cref="Initialise" /> begins a recurring task that continously uploads
+        ///     <see cref="NewRelicInsightsEvent" />
+        ///     instances to New Relic Insights.
+        /// </summary>
+        public void Initialise()
+        {
+            JobManager.Initialize(new NewRelicInsightsEventsUploadRegistry());
+            _hasStarted = true;
+        }
+
+        /// <summary>
+        ///     <see cref="ShutDown" /> stops the recurring task that continously uploads
+        ///     <see cref="NewRelicInsightsEvent" />
+        ///     instances to New Relic Insights.
+        /// </summary>
+        public void ShutDown()
+        {
+            JobManager.RemoveJob(RecurringTaskName);
+            _hasStarted = false;
         }
 
         /// <summary>
