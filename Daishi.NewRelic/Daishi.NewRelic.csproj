@@ -59,6 +59,7 @@
     <Compile Include="NewRelicInsightsCustomHttpHeaderInjecter.cs" />
     <Compile Include="NewRelicInsightsClient.cs" />
     <Compile Include="NewRelicInsightsEvent.cs" />
+    <Compile Include="NewRelicInsightsEventExtractor.cs" />
     <Compile Include="NewRelicInsightsEventUploadException.cs" />
     <Compile Include="NewRelicInsightsFailedResponse.cs" />
     <Compile Include="NewRelicInsightsMetadata.cs" />

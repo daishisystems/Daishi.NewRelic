@@ -675,25 +675,78 @@ Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
 
-using FluentScheduler;
+using System.Collections.Concurrent;
+using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Daishi.NewRelic
+namespace Daishi.NewRelic.Tests
 {
     /// <summary>
-    ///     <see cref="NewRelicInsightsEventsUploadRegistry" /> is a Fluent Scheduler
-    ///     directive that initialises a recurring task that continously uploads
-    ///     <see cref="NewRelicInsightsEvent" />
-    ///     instances to New Relic Insights.
+    ///     <see cref="NewRelicInsightsEventExtractorTests" /> ensures that logic
+    ///     pertaining to <see cref="NewRelicInsightsEventExtractor" /> is executed
+    ///     correctly.
     /// </summary>
-    internal class NewRelicInsightsEventsUploadRegistry : Registry
+    [TestClass]
+    public class NewRelicInsightsEventExtractorTests
     {
-        public NewRelicInsightsEventsUploadRegistry()
+        /// <summary>
+        ///     <see cref="NoEventsAreExtractedFromAnEmptyCache" /> ensures that 0
+        ///     <see cref="NewRelicInsightsEvent" /> instances are extracted from an empty
+        ///     cache.
+        /// </summary>
+        [TestMethod]
+        public void NoEventsAreExtractedFromAnEmptyCache()
         {
-            Schedule<NewRelicInsightsEventsUploadJob>()
-                .WithName(NewRelicInsightsClient.Instance.RecurringTaskName)
-                .ToRunNow()
-                .AndEvery(NewRelicInsightsClient.Instance.RecurringTaskInterval)
-                .Minutes();
+            var extraxtedRelicInsightsEvents =
+                NewRelicInsightsEventExtractor.ExtractNewRelicInsightsEvents(
+                    new ConcurrentQueue<NewRelicInsightsEvent>(), 1000);
+
+            Assert.AreEqual(0, extraxtedRelicInsightsEvents.Count());
+        }
+
+        /// <summary>
+        ///     <see cref="MaximumEventsAreExtractedFromALargeCache" /> ensures that the
+        ///     maximum number of
+        ///     <see cref="NewRelicInsightsEvent" /> instances are extracted from a cache
+        ///     that holds a greater number of <see cref="NewRelicInsightsEvent" />
+        ///     instances than the maximum upload-limit (1000).
+        /// </summary>
+        [TestMethod]
+        public void MaximumEventsAreExtractedFromALargeCache()
+        {
+            var cache = new ConcurrentQueue<NewRelicInsightsEvent>();
+
+            for (var i = 0; i < 1001; i++)
+            {
+                cache.Enqueue(new DummyNewRelicInsightsEvent());
+            }
+
+            var extraxtedRelicInsightsEvents =
+                NewRelicInsightsEventExtractor.ExtractNewRelicInsightsEvents(cache, 1000);
+
+            Assert.AreEqual(1000, extraxtedRelicInsightsEvents.Count());
+        }
+
+        /// <summary>
+        ///     <see cref="AllEventsAreExtractedFromASmallCache" /> ensures that all
+        ///     <see cref="NewRelicInsightsEvent" /> instances are extracted from a cache
+        ///     that holds a lesser number of <see cref="NewRelicInsightsEvent" />
+        ///     instances (999) than the maximum upload-limit (1000).
+        /// </summary>
+        [TestMethod]
+        public void AllEventsAreExtractedFromASmallCache()
+        {
+            var cache = new ConcurrentQueue<NewRelicInsightsEvent>();
+
+            for (var i = 0; i < 999; i++)
+            {
+                cache.Enqueue(new DummyNewRelicInsightsEvent());
+            }
+
+            var extraxtedRelicInsightsEvents =
+                NewRelicInsightsEventExtractor.ExtractNewRelicInsightsEvents(cache, 1000);
+
+            Assert.AreEqual(999, extraxtedRelicInsightsEvents.Count());
         }
     }
 }

@@ -71,6 +71,7 @@
     <Compile Include="NewRelicInsightsCustomHttpHeaderInjecterTests.cs" />
     <Compile Include="NewRelicInsightsResponseParserTests.cs" />
     <Compile Include="NewRelicInsightsClientTests.cs" />
+    <Compile Include="NewRelicInsightsEventExtractorTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Aegis.Monitor.Core.licenseheader" />
