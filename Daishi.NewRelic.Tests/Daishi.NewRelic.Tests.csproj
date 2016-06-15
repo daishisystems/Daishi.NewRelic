@@ -70,6 +70,7 @@
     <Compile Include="NewRelicInsightsMetadataValidatorTests.cs" />
     <Compile Include="NewRelicInsightsCustomHttpHeaderInjecterTests.cs" />
     <Compile Include="NewRelicInsightsResponseParserTests.cs" />
+    <Compile Include="NewRelicInsightsClientTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Aegis.Monitor.Core.licenseheader" />

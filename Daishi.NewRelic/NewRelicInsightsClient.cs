@@ -676,6 +676,7 @@ Public License instead of this License.  But first, please read
 */
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
@@ -686,6 +687,7 @@ using Jil;
 
 // ToDo: Add cache
 // ToDo: Add Nuget package
+// ToDo: Leverage this in Aegis.BlackList.Client for error-reporting.
 
 namespace Daishi.NewRelic
 {
@@ -696,6 +698,39 @@ namespace Daishi.NewRelic
     /// </summary>
     public class NewRelicInsightsClient
     {
+
+        static NewRelicInsightsClient()
+        {
+
+        }
+
+        private NewRelicInsightsClient()
+        {
+            NewRelicInsightsEvents = new ConcurrentBag<NewRelicInsightsEvent>();
+        }
+
+        public static NewRelicInsightsClient Instance { get; } = new NewRelicInsightsClient();
+
+        /// <summary>
+        ///     <see cref="NewRelicInsightsEvents" /> is a collection of
+        ///     <see cref="NewRelicInsightsEvent" /> instances.
+        /// </summary>
+        public ConcurrentBag<NewRelicInsightsEvent> NewRelicInsightsEvents { get; }
+
+        /// <summary>
+        ///     <see cref="AddNewRelicInsightEvent" /> adds
+        ///     <see cref="newRelicInsightsEvent" /> to
+        ///     <see cref="NewRelicInsightsEvents" />.
+        /// </summary>
+        /// <param name="newRelicInsightsEvent">
+        ///     The <see cref="NewRelicInsightsEvent" /> to
+        ///     be added to <see cref="NewRelicInsightsEvents" />.
+        /// </param>
+        public void AddNewRelicInsightEvent(NewRelicInsightsEvent newRelicInsightsEvent)
+        {
+            NewRelicInsightsEvents.Add(newRelicInsightsEvent);
+        }
+
         /// <summary>
         ///     <see cref="UploadEvents{T}" /> uploads
         ///     <see cref="newRelicInsightsEvents" /> to New Relic Insights, as a single
