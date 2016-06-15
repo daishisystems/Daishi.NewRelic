@@ -675,42 +675,54 @@ Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
 
-using System.Reflection;
-using System.Runtime.InteropServices;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-// General Information about an assembly is controlled through the following 
-// set of attributes. Change these attribute values to modify the information
-// associated with an assembly.
+namespace Daishi.NewRelic.Tests
+{
+    /// <summary>
+    ///     <see cref="NewRelicInsightsResponseParserTests" /> ensures that logic
+    ///     pertaining to <see cref="NewRelicInsightsResponseParser" /> executes
+    ///     correctly.
+    /// </summary>
+    [TestClass]
+    public class NewRelicInsightsResponseParserTests
+    {
+        /// <summary>
+        ///     <see cref="NewRelicInsightsSuccessfulResponseIsParsed" /> ensures that
+        ///     successful New Relic Insights responses are parsed correctly.
+        /// </summary>
+        [TestMethod]
+        public void NewRelicInsightsSuccessfulResponseIsParsed()
+        {
+            const string successfulResponseContent = "{\"success\":true}";
 
-[assembly: AssemblyTitle("Daishi.NewRelic.Tests")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Daishi.NewRelic.Tests")]
-[assembly: AssemblyCopyright("Copyright ©  2016")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
+            var newRelicInsightsResponse =
+                NewRelicInsightsResponseParser.Parse(true, successfulResponseContent);
 
-// Setting ComVisible to false makes the types in this assembly not visible 
-// to COM components.  If you need to access a type in this assembly from 
-// COM, set the ComVisible attribute to true on that type.
+            Assert.IsInstanceOfType(newRelicInsightsResponse,
+                typeof(NewRelicInsightsSuccessfulResponse));
+            Assert.IsTrue(newRelicInsightsResponse.Success);
+            Assert.AreEqual("Success", newRelicInsightsResponse.Message);
+        }
 
-[assembly: ComVisible(false)]
+        /// <summary>
+        ///     <see cref="NewRelicInsightsFailedResponseIsParsed" /> ensures that failed
+        ///     New Relic Insights responses are parsed correctly.
+        /// </summary>
+        [TestMethod]
+        public void NewRelicInsightsFailedResponseIsParsed()
+        {
+            const string failedResponseContent =
+                "{\"error\":\"Missing required field `eventType`\"}";
 
-// The following GUID is for the ID of the typelib if this project is exposed to COM
+            var newRelicInsightsResponse =
+                NewRelicInsightsResponseParser.Parse(false, failedResponseContent);
 
-[assembly: Guid("2a524370-1f98-41e0-ad74-d934911e8235")]
-
-// Version information for an assembly consists of the following four values:
-//
-//      Major Version
-//      Minor Version 
-//      Build Number
-//      Revision
-//
-// You can specify all the values or you can default the Build and Revision Numbers 
-// by using the '*' as shown below:
-// [assembly: AssemblyVersion("1.0.*")]
-
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+            Assert.IsInstanceOfType(newRelicInsightsResponse,
+                typeof(NewRelicInsightsFailedResponse));
+            Assert.IsFalse(newRelicInsightsResponse.Success);
+            Assert.AreEqual("Missing required field `eventType`",
+                newRelicInsightsResponse.Message);
+        }
+    }
+}

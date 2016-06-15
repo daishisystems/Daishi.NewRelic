@@ -54,12 +54,16 @@
     <Compile Include="NewRelicInsightsCustomHttpHeaderInjecter.cs" />
     <Compile Include="NewRelicInsightsClient.cs" />
     <Compile Include="NewRelicInsightsEvent.cs" />
+    <Compile Include="NewRelicInsightsEventUploadException.cs" />
     <Compile Include="NewRelicInsightsFailedResponse.cs" />
     <Compile Include="NewRelicInsightsMetadata.cs" />
     <Compile Include="NewRelicInsightsMetadataException.cs" />
     <Compile Include="NewRelicInsightsMetadataValidator.cs" />
+    <Compile Include="NewRelicInsightsResponse.cs" />
+    <Compile Include="NewRelicInsightsResponseParser.cs" />
     <Compile Include="NewRelicInsightsSuccessfulResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UnableToParseNewRelicInsightsResponseException.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Aegis.Monitor.Core.licenseheader" />

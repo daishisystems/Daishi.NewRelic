@@ -674,6 +674,7 @@ the library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
+
 using Jil;
 
 namespace Daishi.NewRelic
@@ -682,13 +683,25 @@ namespace Daishi.NewRelic
     ///     <see cref="NewRelicInsightsFailedResponse" /> encapsulates metadata
     ///     returned from failed New Relic Insights HTTP requests.
     /// </summary>
-    internal class NewRelicInsightsFailedResponse
+    public class NewRelicInsightsFailedResponse : NewRelicInsightsResponse
     {
         /// <summary>
         ///     <see cref="Error" /> represents a detailed error message pertaining to the
-        ///     HTTP request failure.
+        ///     New Relic Insights HTTP request failure.
         /// </summary>
         [JilDirective(Name = "error")]
         public string Error { get; set; }
+
+        /// <summary>
+        ///     <see cref="NewRelicInsightsResponse.Success" /> is <c>true</c> if the HTTP
+        ///     request to New Relic Insights was successful. Otherwise, <c>false</c>.
+        /// </summary>
+        public bool Success => false;
+
+        /// <summary>
+        ///     <see cref="NewRelicInsightsResponse.Message" /> is a friendly message
+        ///     pertaining to the New Relic Insights HTTP response.
+        /// </summary>
+        public string Message => Error;
     }
 }

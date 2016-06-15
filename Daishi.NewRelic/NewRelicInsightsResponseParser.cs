@@ -675,42 +675,61 @@ Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
 
-using System.Reflection;
-using System.Runtime.InteropServices;
+using System;
+using System.IO;
+using Jil;
 
-// General Information about an assembly is controlled through the following 
-// set of attributes. Change these attribute values to modify the information
-// associated with an assembly.
+namespace Daishi.NewRelic
+{
+    /// <summary>
+    ///     <see cref="NewRelicInsightsResponseParser" /> provides a means of parsing
+    ///     New Relic Insights HTTP responses.
+    /// </summary>
+    public static class NewRelicInsightsResponseParser
+    {
+        /// <summary>
+        ///     <see cref="NewRelicInsightsResponseParser" /> parses
+        ///     <see cref="httpResponseContent" /> and returns and appropriate instance of
+        ///     <see cref="NewRelicInsightsResponse" />, depending on success or failure.
+        /// </summary>
+        /// <param name="isSuccessStatusCode">
+        ///     <c>True</c>, if the HTTP status code that yielded
+        ///     <see cref="httpResponseContent" /> was successful.
+        /// </param>
+        /// <param name="httpResponseContent">
+        ///     The content returned from a HTTP request to
+        ///     New Relic Insights.
+        /// </param>
+        /// <returns>
+        ///     An instance of <see cref="NewRelicInsightsSuccessfulResponse" />, if
+        ///     <see cref="isSuccessStatusCode" /> is <c>true</c>. Otherwise, an instance
+        ///     of <see cref="NewRelicInsightsFailedResponse" />.
+        /// </returns>
+        /// <remarks>
+        ///     Throws an
+        ///     <see cref="UnableToParseNewRelicInsightsResponseException" />, if
+        ///     <see cref="httpResponseContent" /> could not be parsed.
+        /// </remarks>
+        public static NewRelicInsightsResponse Parse(bool isSuccessStatusCode,
+            string httpResponseContent)
+        {
+            using (var reader = new StringReader(httpResponseContent))
+            {
+                try
+                {
+                    if (isSuccessStatusCode)
+                    {
+                        return JSON.Deserialize<NewRelicInsightsSuccessfulResponse>(
+                            reader.ReadToEnd());
+                    }
 
-[assembly: AssemblyTitle("Daishi.NewRelic.Tests")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Daishi.NewRelic.Tests")]
-[assembly: AssemblyCopyright("Copyright ©  2016")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
-
-// Setting ComVisible to false makes the types in this assembly not visible 
-// to COM components.  If you need to access a type in this assembly from 
-// COM, set the ComVisible attribute to true on that type.
-
-[assembly: ComVisible(false)]
-
-// The following GUID is for the ID of the typelib if this project is exposed to COM
-
-[assembly: Guid("2a524370-1f98-41e0-ad74-d934911e8235")]
-
-// Version information for an assembly consists of the following four values:
-//
-//      Major Version
-//      Minor Version 
-//      Build Number
-//      Revision
-//
-// You can specify all the values or you can default the Build and Revision Numbers 
-// by using the '*' as shown below:
-// [assembly: AssemblyVersion("1.0.*")]
-
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+                    return JSON.Deserialize<NewRelicInsightsFailedResponse>(reader.ReadToEnd());
+                }
+                catch (Exception exception)
+                {
+                    throw new UnableToParseNewRelicInsightsResponseException(exception.Message);
+                }
+            }
+        }
+    }
+}

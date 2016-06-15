@@ -674,6 +674,7 @@ the library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
+
 using System;
 using System.Net;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -681,7 +682,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 // ToDo: Rename NewRelic to NewRelic.Insights
 // ToDo: Add Client with Fluent recurring task. Think about abstracting this for a future blog post:
 // "Caching and persisting monitoring metadata"
-// ToDo: Add Sample App to test Client
 // ToDo: Talk to Colin, Silva, re: deployment
 
 namespace Daishi.NewRelic.Tests

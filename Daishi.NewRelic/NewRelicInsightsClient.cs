@@ -674,6 +674,8 @@ the library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
@@ -681,10 +683,39 @@ using System.Net.Http.Headers;
 using System.Text;
 using Jil;
 
+// ToDo: Add cache
+// ToDo: Add Nuget package
+
 namespace Daishi.NewRelic
 {
+    /// <summary>
+    ///     <see cref="NewRelicInsightsClient" /> provides features the allow:
+    ///     <para>Batch-upload of New Relic Insights events</para>
+    ///     <para>New Relic Insight event caching, and recurring-upload</para>
+    /// </summary>
     public class NewRelicInsightsClient
     {
+        /// <summary>
+        ///     <see cref="UploadEvents{T}" /> uploads
+        ///     <see cref="newRelicInsightsEvents" /> to New Relic Insights, as a single
+        ///     batch of multiple <see cref="NewRelicInsightsEvent" /> instances.
+        /// </summary>
+        /// <typeparam name="T">
+        ///     An implementation derived from
+        ///     <see cref="NewRelicInsightsEvent" />.
+        /// </typeparam>
+        /// <param name="newRelicInsightsEvents">
+        ///     The <see cref="NewRelicInsightsEvent" />
+        ///     instances to upload.
+        /// </param>
+        /// <param name="httpClientFactory">
+        ///     A factory that creates
+        ///     <see cref="HttpClient" /> instances.
+        /// </param>
+        /// <param name="newRelicInsightsMetadata">
+        ///     Metadata pertaining to a New Relic
+        ///     Insights HTTP connection.
+        /// </param>
         public static void UploadEvents<T>(IEnumerable<T> newRelicInsightsEvents,
             HttpClientFactory httpClientFactory,
             NewRelicInsightsMetadata newRelicInsightsMetadata) where T : NewRelicInsightsEvent
@@ -723,48 +754,50 @@ namespace Daishi.NewRelic
 
                 using (stringWriter = new StringWriter())
                 {
-                    JSON.Serialize(newRelicInsightsEvents, stringWriter);
+                    try
+                    {
+                        JSON.Serialize(newRelicInsightsEvents, stringWriter);
 
-                    httpResponseMessage = httpClient.PostAsync(
-                        string.Concat(
-                            newRelicInsightsMetadata.URI, "/",
-                            newRelicInsightsMetadata.AccountID,
-                            "/events"),
-                        new StringContent(
-                            stringWriter.ToString(),
-                            Encoding.UTF8,
-                            "application/json")
-                        ).Result;
+                        httpResponseMessage = httpClient.PostAsync(
+                            string.Concat(
+                                newRelicInsightsMetadata.URI, "/",
+                                newRelicInsightsMetadata.AccountID,
+                                "/events"),
+                            new StringContent(
+                                stringWriter.ToString(),
+                                Encoding.UTF8,
+                                "application/json")
+                            ).Result;
+                    }
+                    catch (Exception exception)
+                    {
+                        throw new NewRelicInsightsEventUploadException(
+                            "An error occurred while uploading events to New Relic Insights",
+                            exception);
+                    }
                 }
 
-                var newRelicResponseMetadata =
-                    httpResponseMessage.Content.ReadAsStringAsync().Result;
-
-                if (httpResponseMessage.IsSuccessStatusCode)
+                try
                 {
-                    using (var reader = new StringReader(newRelicResponseMetadata))
+                    var httpResponseContent =
+                        httpResponseMessage.Content.ReadAsStringAsync().Result;
+
+                    var newRelicInsightsResponse =
+                        NewRelicInsightsResponseParser.Parse(
+                            httpResponseMessage.IsSuccessStatusCode,
+                            httpResponseContent);
+
+                    if (!newRelicInsightsResponse.Success)
                     {
-                        var newRelicInsightsSuccessfulResponse =
-                            JSON.Deserialize<NewRelicInsightsSuccessfulResponse>(reader.ReadToEnd());
-
-                        if (!newRelicInsightsSuccessfulResponse.Success)
-                        {
-                            throw new NewRelicInsightsMetadataException(
-                                "An error occurred uploading events to New Relic Insights");
-                        }
+                        throw new UnableToParseNewRelicInsightsResponseException(
+                            newRelicInsightsResponse.Message);
                     }
-
                 }
-                else
+                catch (Exception exception)
                 {
-                    using (var reader = new StringReader(newRelicResponseMetadata))
-                    {
-                        var newRelicInsightsFailedResponse =
-                            JSON.Deserialize<NewRelicInsightsFailedResponse>(reader.ReadToEnd());
-
-                        throw new NewRelicInsightsMetadataException(
-                            newRelicInsightsFailedResponse.Error);
-                    }
+                    throw new NewRelicInsightsEventUploadException(
+                        "An error occurred while parsing the New Relic Insights HTTP response.",
+                        exception);
                 }
             }
         }

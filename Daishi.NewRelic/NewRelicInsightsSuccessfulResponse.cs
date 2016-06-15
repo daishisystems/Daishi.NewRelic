@@ -674,6 +674,7 @@ the library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
+
 using Jil;
 
 namespace Daishi.NewRelic
@@ -682,12 +683,19 @@ namespace Daishi.NewRelic
     ///     <see cref="NewRelicInsightsSuccessfulResponse" /> encapsulates metadata
     ///     returned from successful New Relic Insights HTTP requests.
     /// </summary>
-    public class NewRelicInsightsSuccessfulResponse
+    public class NewRelicInsightsSuccessfulResponse : NewRelicInsightsResponse
     {
         /// <summary>
-        ///     <see cref="Success" /> is <c>true</c> if the HTTP request was successful.
+        ///     <see cref="NewRelicInsightsResponse.Success" /> is <c>true</c> if the HTTP
+        ///     request to New Relic Insights was successful. Otherwise, <c>false</c>.
         /// </summary>
         [JilDirective(Name = "success")]
         public bool Success { get; set; }
+
+        /// <summary>
+        ///     <see cref="NewRelicInsightsResponse.Message" /> is a friendly message
+        ///     pertaining to the New Relic Insights HTTP response.
+        /// </summary>
+        public string Message => "Success";
     }
 }
