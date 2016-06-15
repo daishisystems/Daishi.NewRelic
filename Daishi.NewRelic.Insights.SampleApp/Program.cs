@@ -13,13 +13,13 @@ namespace Daishi.NewRelic.Insights.SampleApp
                     new MockNewRelicInsightsEvent
                     {
                         EventType = "AegisTest",
-                        Name = "Random 6",
+                        Name = "Random 8",
                         Count = 100
                     },
                     new MockNewRelicInsightsEvent
                     {
                         EventType = "AegisTest",
-                        Name = "Random 7",
+                        Name = "Random 9",
                         Count = 50
                     }
                 };

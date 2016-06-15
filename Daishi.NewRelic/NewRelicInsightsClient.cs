@@ -681,6 +681,7 @@ using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading.Tasks;
 using Jil;
 
 // ToDo: Add cache
@@ -716,6 +717,15 @@ namespace Daishi.NewRelic
         ///     Metadata pertaining to a New Relic
         ///     Insights HTTP connection.
         /// </param>
+        /// <remarks>
+        ///     Throws the following <see cref="Exception" /> instances:
+        ///     <para>
+        ///         <see cref="NewRelicInsightsMetadataException" />
+        ///     </para>
+        ///     <para>
+        ///         <see cref="NewRelicInsightsEventUploadException" />
+        ///     </para>
+        /// </remarks>
         public static void UploadEvents<T>(IEnumerable<T> newRelicInsightsEvents,
             HttpClientFactory httpClientFactory,
             NewRelicInsightsMetadata newRelicInsightsMetadata) where T : NewRelicInsightsEvent
@@ -781,6 +791,98 @@ namespace Daishi.NewRelic
                 {
                     var httpResponseContent =
                         httpResponseMessage.Content.ReadAsStringAsync().Result;
+
+                    var newRelicInsightsResponse =
+                        NewRelicInsightsResponseParser.Parse(
+                            httpResponseMessage.IsSuccessStatusCode,
+                            httpResponseContent);
+
+                    if (!newRelicInsightsResponse.Success)
+                    {
+                        throw new UnableToParseNewRelicInsightsResponseException(
+                            newRelicInsightsResponse.Message);
+                    }
+                }
+                catch (Exception exception)
+                {
+                    throw new NewRelicInsightsEventUploadException(
+                        "An error occurred while parsing the New Relic Insights HTTP response.",
+                        exception);
+                }
+            }
+        }
+
+        /// <summary>Asynchronous equivalent of <see cref="UploadEvents{T}" />.</summary>
+        /// <typeparam name="T">See <see cref="UploadEvents{T}" />.</typeparam>
+        /// <param name="newRelicInsightsEvents">See <see cref="UploadEvents{T}" />.</param>
+        /// <param name="httpClientFactory">See <see cref="UploadEvents{T}" />.</param>
+        /// <param name="newRelicInsightsMetadata">See <see cref="UploadEvents{T}" />.</param>
+        /// <returns>See <see cref="UploadEvents{T}" />.</returns>
+        public static async Task UploadEventsAsync<T>(IEnumerable<T> newRelicInsightsEvents,
+            HttpClientFactory httpClientFactory,
+            NewRelicInsightsMetadata newRelicInsightsMetadata) where T : NewRelicInsightsEvent
+        {
+            NewRelicInsightsMetadataException newRelicInsightsMetadataException;
+
+            var newRelicInsightsMetadataIsValid =
+                NewRelicInsightsMetadataValidator.TryValidate(newRelicInsightsMetadata,
+                    out newRelicInsightsMetadataException);
+
+            if (!newRelicInsightsMetadataIsValid)
+            {
+                throw newRelicInsightsMetadataException;
+            }
+
+            HttpClientHandler httpClientHandler;
+
+            using (var httpClient = httpClientFactory.Create(newRelicInsightsMetadata,
+                out httpClientHandler))
+            {
+                httpClient.DefaultRequestHeaders.Accept.Clear();
+
+                httpClient.DefaultRequestHeaders.Accept.Add(
+                    new MediaTypeWithQualityHeaderValue("application/json"));
+
+                var apiKeyHeaderIsAdded = NewRelicInsightsCustomHttpHeaderInjecter.TryInjectAPIKey(
+                    "X-Insert-Key",
+                    newRelicInsightsMetadata.APIKey,
+                    httpClient.DefaultRequestHeaders,
+                    out newRelicInsightsMetadataException);
+
+                if (!apiKeyHeaderIsAdded) throw newRelicInsightsMetadataException;
+
+                StringWriter stringWriter;
+                HttpResponseMessage httpResponseMessage;
+
+                using (stringWriter = new StringWriter())
+                {
+                    try
+                    {
+                        JSON.Serialize(newRelicInsightsEvents, stringWriter);
+
+                        httpResponseMessage = await httpClient.PostAsync(
+                            string.Concat(
+                                newRelicInsightsMetadata.URI, "/",
+                                newRelicInsightsMetadata.AccountID,
+                                "/events"),
+                            new StringContent(
+                                stringWriter.ToString(),
+                                Encoding.UTF8,
+                                "application/json")
+                            );
+                    }
+                    catch (Exception exception)
+                    {
+                        throw new NewRelicInsightsEventUploadException(
+                            "An error occurred while uploading events to New Relic Insights",
+                            exception);
+                    }
+                }
+
+                try
+                {
+                    var httpResponseContent =
+                        await httpResponseMessage.Content.ReadAsStringAsync();
 
                     var newRelicInsightsResponse =
                         NewRelicInsightsResponseParser.Parse(
