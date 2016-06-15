@@ -686,9 +686,8 @@ using System.Threading.Tasks;
 using FluentScheduler;
 using Jil;
 
-// ToDo: Add cache
 // ToDo: Add Nuget package
-// ToDo: Leverage this in Aegis.BlackList.Client for error-reporting.
+// ToDo: Change BlackListClient to leverage an instance of metadata class.
 
 namespace Daishi.NewRelic
 {
@@ -712,6 +711,7 @@ namespace Daishi.NewRelic
         private NewRelicInsightsClient()
         {
             NewRelicInsightsEvents = new ConcurrentQueue<NewRelicInsightsEvent>();
+            NewRelicInsightsMetadata = new NewRelicInsightsMetadata();
         }
 
         public static NewRelicInsightsClient Instance { get; } = new NewRelicInsightsClient();
@@ -765,6 +765,13 @@ namespace Daishi.NewRelic
             get { return _cacheUploadLimit <= 0 ? 1000 : _cacheUploadLimit; }
             set { _cacheUploadLimit = value >= 0 ? value : 1000; }
         }
+
+        /// <summary>
+        ///     <see cref="NewRelicInsightsMetadata" /> is a template that contains
+        ///     properties that pertain to a New Relic Insights event, as well as New Relic
+        ///     Insights connection-specific properties, such as URI, proxy, etc.
+        /// </summary>
+        public NewRelicInsightsMetadata NewRelicInsightsMetadata { get; private set; }
 
         /// <summary>
         ///     <see cref="AddNewRelicInsightEvent" /> adds

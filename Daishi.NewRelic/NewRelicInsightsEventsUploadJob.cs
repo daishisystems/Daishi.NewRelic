@@ -706,7 +706,14 @@ namespace Daishi.NewRelic
 
                 try
                 {
+                    var newRelicInsightsEvents =
+                        NewRelicInsightsEventExtractor.ExtractNewRelicInsightsEvents(
+                            NewRelicInsightsClient.Instance.NewRelicInsightsEvents,
+                            NewRelicInsightsClient.Instance.CacheUploadLimit);
 
+                    NewRelicInsightsClient.UploadEvents(newRelicInsightsEvents,
+                        new HttpClientFactory(),
+                        NewRelicInsightsClient.Instance.NewRelicInsightsMetadata);
                 }
                 catch (Exception)
                 {
