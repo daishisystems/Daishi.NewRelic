@@ -709,7 +709,7 @@ namespace Daishi.NewRelic.Tests
         [TestMethod]
         public void DefaultRecurringTaskNameIsAssignedIfOneIsNotProvided()
         {
-            Assert.AreEqual("GetBlackListJob", NewRelicInsightsClient.Instance.RecurringTaskName);
+            Assert.AreEqual("UploadEvents", NewRelicInsightsClient.Instance.RecurringTaskName);
         }
 
         /// <summary>

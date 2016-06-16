@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Daishi.NewRelic", "Daishi.N
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Daishi.NewRelic.Tests", "Daishi.NewRelic.Tests\Daishi.NewRelic.Tests.csproj", "{2A524370-1F98-41E0-AD74-D934911E8235}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Daishi.NewRelic.Insights.SampleApp", "Daishi.NewRelic.Insights.SampleApp\Daishi.NewRelic.Insights.SampleApp.csproj", "{12A7F565-88CC-47FF-AC0F-7363729F5263}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Daishi.NewRelic.Insights.SampleApp", "Daishi.NewRelic.Insights.SampleApp\Daishi.NewRelic.Insights.SampleApp.csproj", "{FF6461E8-86D0-4707-8399-0878F771A2BD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{2A524370-1F98-41E0-AD74-D934911E8235}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2A524370-1F98-41E0-AD74-D934911E8235}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2A524370-1F98-41E0-AD74-D934911E8235}.Release|Any CPU.Build.0 = Release|Any CPU
-		{12A7F565-88CC-47FF-AC0F-7363729F5263}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{12A7F565-88CC-47FF-AC0F-7363729F5263}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{12A7F565-88CC-47FF-AC0F-7363729F5263}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{12A7F565-88CC-47FF-AC0F-7363729F5263}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF6461E8-86D0-4707-8399-0878F771A2BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF6461E8-86D0-4707-8399-0878F771A2BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF6461E8-86D0-4707-8399-0878F771A2BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF6461E8-86D0-4707-8399-0878F771A2BD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

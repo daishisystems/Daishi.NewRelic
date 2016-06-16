@@ -1,0 +1,1 @@
+﻿<%@ Application Codebehind="Global.asax.cs" Inherits="Daishi.NewRelic.Insights.SampleApp.WebApiApplication" Language="C#" %>

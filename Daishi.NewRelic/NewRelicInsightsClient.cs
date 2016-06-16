@@ -738,7 +738,7 @@ namespace Daishi.NewRelic
             get
             {
                 return string.IsNullOrEmpty(_recurringTaskName)
-                    ? "GetBlackListJob"
+                    ? "UploadEvents"
                     : _recurringTaskName;
             }
             set { _recurringTaskName = value; }
@@ -810,14 +810,10 @@ namespace Daishi.NewRelic
         }
 
         /// <summary>
-        ///     <see cref="UploadEvents{T}" /> uploads
+        ///     <see cref="UploadEvents" /> uploads
         ///     <see cref="newRelicInsightsEvents" /> to New Relic Insights, as a single
         ///     batch of multiple <see cref="NewRelicInsightsEvent" /> instances.
         /// </summary>
-        /// <typeparam name="T">
-        ///     An implementation derived from
-        ///     <see cref="NewRelicInsightsEvent" />.
-        /// </typeparam>
         /// <param name="newRelicInsightsEvents">
         ///     The <see cref="NewRelicInsightsEvent" />
         ///     instances to upload.
@@ -839,9 +835,9 @@ namespace Daishi.NewRelic
         ///         <see cref="NewRelicInsightsEventUploadException" />
         ///     </para>
         /// </remarks>
-        public static void UploadEvents<T>(IEnumerable<T> newRelicInsightsEvents,
+        public static void UploadEvents(IEnumerable<NewRelicInsightsEvent> newRelicInsightsEvents,
             HttpClientFactory httpClientFactory,
-            NewRelicInsightsMetadata newRelicInsightsMetadata) where T : NewRelicInsightsEvent
+            NewRelicInsightsMetadata newRelicInsightsMetadata)
         {
             NewRelicInsightsMetadataException newRelicInsightsMetadataException;
 
@@ -879,7 +875,7 @@ namespace Daishi.NewRelic
                 {
                     try
                     {
-                        JSON.Serialize(newRelicInsightsEvents, stringWriter);
+                        JSON.SerializeDynamic(newRelicInsightsEvents, stringWriter);
 
                         httpResponseMessage = httpClient.PostAsync(
                             string.Concat(
@@ -925,15 +921,17 @@ namespace Daishi.NewRelic
             }
         }
 
-        /// <summary>Asynchronous equivalent of <see cref="UploadEvents{T}" />.</summary>
-        /// <typeparam name="T">See <see cref="UploadEvents{T}" />.</typeparam>
-        /// <param name="newRelicInsightsEvents">See <see cref="UploadEvents{T}" />.</param>
-        /// <param name="httpClientFactory">See <see cref="UploadEvents{T}" />.</param>
-        /// <param name="newRelicInsightsMetadata">See <see cref="UploadEvents{T}" />.</param>
-        /// <returns>See <see cref="UploadEvents{T}" />.</returns>
-        public static async Task UploadEventsAsync<T>(IEnumerable<T> newRelicInsightsEvents,
+        // ToDo: Check list for empty before upload
+
+        /// <summary>Asynchronous equivalent of <see cref="UploadEvents" />.</summary>
+        /// <param name="newRelicInsightsEvents">See <see cref="UploadEvents" />.</param>
+        /// <param name="httpClientFactory">See <see cref="UploadEvents" />.</param>
+        /// <param name="newRelicInsightsMetadata">See <see cref="UploadEvents" />.</param>
+        /// <returns>See <see cref="UploadEvents" />.</returns>
+        public static async Task UploadEventsAsync(
+            IEnumerable<NewRelicInsightsEvent> newRelicInsightsEvents,
             HttpClientFactory httpClientFactory,
-            NewRelicInsightsMetadata newRelicInsightsMetadata) where T : NewRelicInsightsEvent
+            NewRelicInsightsMetadata newRelicInsightsMetadata)
         {
             NewRelicInsightsMetadataException newRelicInsightsMetadataException;
 
@@ -971,7 +969,7 @@ namespace Daishi.NewRelic
                 {
                     try
                     {
-                        JSON.Serialize(newRelicInsightsEvents, stringWriter);
+                        JSON.SerializeDynamic(newRelicInsightsEvents, stringWriter);
 
                         httpResponseMessage = await httpClient.PostAsync(
                             string.Concat(
