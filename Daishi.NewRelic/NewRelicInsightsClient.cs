@@ -679,6 +679,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -839,6 +840,11 @@ namespace Daishi.NewRelic
             HttpClientFactory httpClientFactory,
             NewRelicInsightsMetadata newRelicInsightsMetadata)
         {
+            if (newRelicInsightsEvents == null || !newRelicInsightsEvents.Any())
+            {
+                return;
+            }
+
             NewRelicInsightsMetadataException newRelicInsightsMetadataException;
 
             var newRelicInsightsMetadataIsValid =
@@ -896,21 +902,17 @@ namespace Daishi.NewRelic
                     }
                 }
 
+                NewRelicInsightsResponse newRelicInsightsResponse;
+
                 try
                 {
                     var httpResponseContent =
                         httpResponseMessage.Content.ReadAsStringAsync().Result;
 
-                    var newRelicInsightsResponse =
+                    newRelicInsightsResponse =
                         NewRelicInsightsResponseParser.Parse(
                             httpResponseMessage.IsSuccessStatusCode,
                             httpResponseContent);
-
-                    if (!newRelicInsightsResponse.Success)
-                    {
-                        throw new UnableToParseNewRelicInsightsResponseException(
-                            newRelicInsightsResponse.Message);
-                    }
                 }
                 catch (Exception exception)
                 {
@@ -918,10 +920,14 @@ namespace Daishi.NewRelic
                         "An error occurred while parsing the New Relic Insights HTTP response.",
                         exception);
                 }
+
+                if (!newRelicInsightsResponse.Success)
+                {
+                    throw new UnableToParseNewRelicInsightsResponseException(
+                        newRelicInsightsResponse.Message);
+                }
             }
         }
-
-        // ToDo: Check list for empty before upload
 
         /// <summary>Asynchronous equivalent of <see cref="UploadEvents" />.</summary>
         /// <param name="newRelicInsightsEvents">See <see cref="UploadEvents" />.</param>
@@ -933,6 +939,11 @@ namespace Daishi.NewRelic
             HttpClientFactory httpClientFactory,
             NewRelicInsightsMetadata newRelicInsightsMetadata)
         {
+            if (newRelicInsightsEvents == null || !newRelicInsightsEvents.Any())
+            {
+                return;
+            }
+
             NewRelicInsightsMetadataException newRelicInsightsMetadataException;
 
             var newRelicInsightsMetadataIsValid =
@@ -990,27 +1001,29 @@ namespace Daishi.NewRelic
                     }
                 }
 
+                NewRelicInsightsResponse newRelicInsightsResponse;
+
                 try
                 {
                     var httpResponseContent =
                         await httpResponseMessage.Content.ReadAsStringAsync();
 
-                    var newRelicInsightsResponse =
+                    newRelicInsightsResponse =
                         NewRelicInsightsResponseParser.Parse(
                             httpResponseMessage.IsSuccessStatusCode,
                             httpResponseContent);
-
-                    if (!newRelicInsightsResponse.Success)
-                    {
-                        throw new UnableToParseNewRelicInsightsResponseException(
-                            newRelicInsightsResponse.Message);
-                    }
                 }
                 catch (Exception exception)
                 {
                     throw new NewRelicInsightsEventUploadException(
                         "An error occurred while parsing the New Relic Insights HTTP response.",
                         exception);
+                }
+
+                if (!newRelicInsightsResponse.Success)
+                {
+                    throw new UnableToParseNewRelicInsightsResponseException(
+                        newRelicInsightsResponse.Message);
                 }
             }
         }
