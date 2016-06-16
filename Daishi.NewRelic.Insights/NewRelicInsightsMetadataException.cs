@@ -675,33 +675,29 @@ Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
 
-using Jil;
+using System;
 
-namespace Daishi.NewRelic
+namespace Daishi.NewRelic.Insights
 {
     /// <summary>
-    ///     <see cref="NewRelicInsightsFailedResponse" /> encapsulates metadata
-    ///     returned from failed New Relic Insights HTTP requests.
+    ///     <see cref="NewRelicInsightsMetadataException" /> is thrown if an instance
+    ///     of <see cref="NewRelicInsightsMetadata" />, that contains invalid, or
+    ///     omitted properties, is used to establish a connection to New Relic
+    ///     Insights.
     /// </summary>
-    public class NewRelicInsightsFailedResponse : NewRelicInsightsResponse
+    public class NewRelicInsightsMetadataException : Exception
     {
-        /// <summary>
-        ///     <see cref="Error" /> represents a detailed error message pertaining to the
-        ///     New Relic Insights HTTP request failure.
-        /// </summary>
-        [JilDirective(Name = "error")]
-        public string Error { get; set; }
+        public NewRelicInsightsMetadataException()
+        {
+        }
 
-        /// <summary>
-        ///     <see cref="NewRelicInsightsResponse.Success" /> is <c>true</c> if the HTTP
-        ///     request to New Relic Insights was successful. Otherwise, <c>false</c>.
-        /// </summary>
-        public bool Success => false;
+        public NewRelicInsightsMetadataException(string message) : base(message)
+        {
+        }
 
-        /// <summary>
-        ///     <see cref="NewRelicInsightsResponse.Message" /> is a friendly message
-        ///     pertaining to the New Relic Insights HTTP response.
-        /// </summary>
-        public string Message => Error;
+        public NewRelicInsightsMetadataException(string message, Exception inner)
+            : base(message, inner)
+        {
+        }
     }
 }

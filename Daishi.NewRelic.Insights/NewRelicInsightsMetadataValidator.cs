@@ -676,60 +676,95 @@ Public License instead of this License.  But first, please read
 */
 
 using System;
-using System.IO;
-using Jil;
 
-namespace Daishi.NewRelic
+namespace Daishi.NewRelic.Insights
 {
     /// <summary>
-    ///     <see cref="NewRelicInsightsResponseParser" /> provides a means of parsing
-    ///     New Relic Insights HTTP responses.
+    ///     <see cref="NewRelicInsightsMetadataValidator" /> validates and instance of
+    ///     <see cref="NewRelicInsightsMetadata" />, ensuring that relevant properties
+    ///     are instantiated correctly.
     /// </summary>
-    public static class NewRelicInsightsResponseParser
+    public class NewRelicInsightsMetadataValidator
     {
         /// <summary>
-        ///     <see cref="NewRelicInsightsResponseParser" /> parses
-        ///     <see cref="httpResponseContent" /> and returns and appropriate instance of
-        ///     <see cref="NewRelicInsightsResponse" />, depending on success or failure.
+        ///     <see cref="TryValidate" /> ensures that
+        ///     <see cref="newRelicInsightsMetadata" />
+        ///     is instantiated correctly. If any <see cref="NewRelicInsightsMetadata" />
+        ///     properties are not instantiated correctly, the method returns <c>false</c>,
+        ///     and outputs a <see cref="NewRelicInsightsMetadataException" />.
         /// </summary>
-        /// <param name="isSuccessStatusCode">
-        ///     <c>True</c>, if the HTTP status code that yielded
-        ///     <see cref="httpResponseContent" /> was successful.
+        /// <param name="newRelicInsightsMetadata">
+        ///     The
+        ///     <see cref="NewRelicInsightsMetadata" /> instance to validate.
         /// </param>
-        /// <param name="httpResponseContent">
-        ///     The content returned from a HTTP request to
-        ///     New Relic Insights.
+        /// <param name="newRelicInsightsMetadataException">
+        ///     A
+        ///     <see cref="NewRelicInsightsMetadataException" />, returned if any
+        ///     <see cref="NewRelicInsightsMetadata" /> properties are not instantiated
+        ///     correctly.
         /// </param>
         /// <returns>
-        ///     An instance of <see cref="NewRelicInsightsSuccessfulResponse" />, if
-        ///     <see cref="isSuccessStatusCode" /> is <c>true</c>. Otherwise, an instance
-        ///     of <see cref="NewRelicInsightsFailedResponse" />.
+        ///     <c>True</c> if all <see cref="newRelicInsightsMetadata" /> properties are
+        ///     instantiated correctly.
         /// </returns>
-        /// <remarks>
-        ///     Throws an
-        ///     <see cref="UnableToParseNewRelicInsightsResponseException" />, if
-        ///     <see cref="httpResponseContent" /> could not be parsed.
-        /// </remarks>
-        public static NewRelicInsightsResponse Parse(bool isSuccessStatusCode,
-            string httpResponseContent)
+        public static bool TryValidate(NewRelicInsightsMetadata newRelicInsightsMetadata,
+            out NewRelicInsightsMetadataException newRelicInsightsMetadataException)
         {
-            using (var reader = new StringReader(httpResponseContent))
-            {
-                try
-                {
-                    if (isSuccessStatusCode)
-                    {
-                        return JSON.Deserialize<NewRelicInsightsSuccessfulResponse>(
-                            reader.ReadToEnd());
-                    }
+            newRelicInsightsMetadataException = null;
 
-                    return JSON.Deserialize<NewRelicInsightsFailedResponse>(reader.ReadToEnd());
-                }
-                catch (Exception exception)
-                {
-                    throw new UnableToParseNewRelicInsightsResponseException(exception.Message);
-                }
+            if (newRelicInsightsMetadata == null)
+            {
+                newRelicInsightsMetadataException =
+                    new NewRelicInsightsMetadataException(
+                        "New Relic Insights metadata not specified.");
+
+                return false;
             }
+
+            if (string.IsNullOrEmpty(newRelicInsightsMetadata.AccountID))
+            {
+                newRelicInsightsMetadataException =
+                    new NewRelicInsightsMetadataException("Invalid Account ID.");
+
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(newRelicInsightsMetadata.APIKey))
+            {
+                newRelicInsightsMetadataException =
+                    new NewRelicInsightsMetadataException("Invalid API key.");
+
+                return false;
+            }
+
+            if (newRelicInsightsMetadata.URI == null)
+            {
+                newRelicInsightsMetadataException =
+                    new NewRelicInsightsMetadataException("URI not specified.");
+
+                return false;
+            }
+
+            if (newRelicInsightsMetadata.UseWebProxy && newRelicInsightsMetadata.WebProxy == null)
+            {
+                newRelicInsightsMetadataException =
+                    new NewRelicInsightsMetadataException(
+                        "UseWebProxy is true, but no proxy is specified.");
+
+                return false;
+            }
+
+            if (newRelicInsightsMetadata.UseNonDefaultTimeout &&
+                newRelicInsightsMetadata.NonDefaultTimeout == TimeSpan.Zero)
+            {
+                newRelicInsightsMetadataException =
+                    new NewRelicInsightsMetadataException(
+                        "UseNonDefaultTimeout is true, but no timeout is specified.");
+
+                return false;
+            }
+
+            return true;
         }
     }
 }

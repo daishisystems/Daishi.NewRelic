@@ -677,35 +677,25 @@ Public License instead of this License.  But first, please read
 
 using Jil;
 
-namespace Daishi.NewRelic.Tests
+namespace Daishi.NewRelic.Insights
 {
     /// <summary>
-    ///     <see cref="DummyNewRelicInsightsEvent" /> is a mock implementation of
-    ///     <see cref="NewRelicInsightsEvent" />, to facilitate unit-testing.
+    ///     <see cref="NewRelicInsightsSuccessfulResponse" /> encapsulates metadata
+    ///     returned from successful New Relic Insights HTTP requests.
     /// </summary>
-    internal class DummyNewRelicInsightsEvent : NewRelicInsightsEvent
+    public class NewRelicInsightsSuccessfulResponse : NewRelicInsightsResponse
     {
+        /// <summary>
+        ///     <see cref="NewRelicInsightsResponse.Success" /> is <c>true</c> if the HTTP
+        ///     request to New Relic Insights was successful. Otherwise, <c>false</c>.
+        /// </summary>
+        [JilDirective(Name = "success")]
+        public bool Success { get; set; }
 
         /// <summary>
-        ///     EventType is the New Relic Insights Event Grouping. It determines the
-        ///     database to which the event will persist.
+        ///     <see cref="NewRelicInsightsResponse.Message" /> is a friendly message
+        ///     pertaining to the New Relic Insights HTTP response.
         /// </summary>
-        /// <remarks>
-        ///     <para>
-        ///         <see cref="NewRelicInsightsEvent.EventType" /><c>must</c> be serialised
-        ///         in Camel case, in order to be correctly interpreted by New Relic
-        ///         Insights.
-        ///     </para>
-        ///     <para>
-        ///         Apply the following attribute to the
-        ///         <see cref="NewRelicInsightsEvent.EventType" />
-        ///         property in your implementation:
-        ///     </para>
-        ///     <para>
-        ///         <c>[JilDirective(Name = "eventType")]</c>
-        ///     </para>
-        /// </remarks>
-        [JilDirective(Name = "eventType")]
-        public string EventType { get; set; }
+        public string Message => "Success";
     }
 }

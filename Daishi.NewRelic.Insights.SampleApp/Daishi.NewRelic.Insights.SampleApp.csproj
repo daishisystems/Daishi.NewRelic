@@ -225,18 +225,18 @@
     <Content Include="Views\Shared\_Layout.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Daishi.NewRelic\Daishi.NewRelic.csproj">
-      <Project>{02bce6a0-ff01-4880-b9cf-b17a1fcb0922}</Project>
-      <Name>Daishi.NewRelic</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />
     <Content Include="fonts\glyphicons-halflings-regular.ttf" />
     <Content Include="fonts\glyphicons-halflings-regular.eot" />
     <Content Include="packages.config" />
     <None Include="Project_Readme.html" />
     <Content Include="Scripts\jquery-1.10.2.min.map" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Daishi.NewRelic.Insights\Daishi.NewRelic.Insights.csproj">
+      <Project>{02BCE6A0-FF01-4880-B9CF-B17A1FCB0922}</Project>
+      <Name>Daishi.NewRelic.Insights</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

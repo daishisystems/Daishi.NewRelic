@@ -675,120 +675,83 @@ Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
 
+using System;
+using System.Net;
+using System.Net.Http;
+using Daishi.NewRelic.Insights;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Daishi.NewRelic.Tests
+namespace Daishi.NewRelic.Insights.Tests
 {
     /// <summary>
-    ///     <see cref="NewRelicInsightsClientTests" /> ensures that logic pertaining to
-    ///     <see cref="NewRelicInsightsClient" /> instances is executed correctly.
+    ///     <see cref="HttpClientFactoryTests" /> ensures that logic pertaining to
+    ///     <see cref="HttpClientFactory" /> executes correctly.
     /// </summary>
     [TestClass]
-    public class NewRelicInsightsClientTests
+    public class HttpClientFactoryTests
     {
         /// <summary>
-        ///     <see cref="NewRelicInsightsEventIsAddedToCache" /> ensures that instances
-        ///     of <see cref="NewRelicInsightsEvent" /> are added to
-        ///     <see cref="NewRelicInsightsClient.NewRelicInsightsEvents" />.
+        ///     <see cref="HttpClientWithProxyIsCreated" /> ensures that a
+        ///     <see cref="HttpClient" /> instance is created, with the specified proxy
+        ///     server.
         /// </summary>
         [TestMethod]
-        public void NewRelicInsightsEventIsAddedToCache()
+        public void HttpClientWithProxyIsCreated()
         {
-            var dummyNewRelicInsightsEvent = new DummyNewRelicInsightsEvent();
+            var newRelicInsightsMetadata = new NewRelicInsightsMetadata
+            {
+                UseWebProxy = true,
+                WebProxy = new WebProxy(new Uri("http://localhost"))
+            };
 
-            NewRelicInsightsClient.Instance.AddNewRelicInsightEvent(dummyNewRelicInsightsEvent);
+            HttpClientHandler httpClientHandler;
 
-            Assert.AreEqual(1, NewRelicInsightsClient.Instance.NewRelicInsightsEvents.Count);
+            var httpClientFactory = new HttpClientFactory();
+            httpClientFactory.Create(newRelicInsightsMetadata, out httpClientHandler);
+
+            Assert.IsTrue(httpClientHandler.UseProxy);
+            Assert.AreEqual(newRelicInsightsMetadata.WebProxy, httpClientHandler.Proxy);
         }
 
         /// <summary>
-        ///     <see cref="DefaultRecurringTaskNameIsAssignedIfOneIsNotProvided" /> ensures
-        ///     that a default <see cref="NewRelicInsightsClient.RecurringTaskName" /> is
-        ///     assigned, if one is not provided.
+        ///     <see cref="HttpClientWithoutProxyIsCreated" /> ensures that a
+        ///     <see cref="HttpClient" /> instance is created, with no specified proxy
+        ///     server.
         /// </summary>
         [TestMethod]
-        public void DefaultRecurringTaskNameIsAssignedIfOneIsNotProvided()
+        public void HttpClientWithoutProxyIsCreated()
         {
-            Assert.AreEqual("UploadEvents", NewRelicInsightsClient.Instance.RecurringTaskName);
+            var newRelicInsightsMetadata = new NewRelicInsightsMetadata();
+
+            HttpClientHandler httpClientHandler;
+
+            var httpClientFactory = new HttpClientFactory();
+            httpClientFactory.Create(newRelicInsightsMetadata, out httpClientHandler);
+
+            Assert.IsNull(httpClientHandler);
+            Assert.IsNotNull(newRelicInsightsMetadata);
         }
 
         /// <summary>
-        ///     <see cref="DefaultRecurringTaskIntervalIsAssignedIfOneIsNotProvided" />
-        ///     ensures that a default
-        ///     <see cref="NewRelicInsightsClient.RecurringTaskInterval" />
-        ///     is assigned, if one is not provided.
+        ///     <see cref="HttpClientWithNonDefaultTimeoutIsCreated" /> ensures that a
+        ///     <see cref="HttpClient" /> instance is created, with a non-default timeout.
         /// </summary>
         [TestMethod]
-        public void DefaultRecurringTaskIntervalIsAssignedIfOneIsNotProvided()
+        public void HttpClientWithNonDefaultTimeoutIsCreated()
         {
-            Assert.AreEqual(1, NewRelicInsightsClient.Instance.RecurringTaskInterval);
-        }
+            var newRelicInsightsMetadata = new NewRelicInsightsMetadata
+            {
+                UseNonDefaultTimeout = true,
+                NonDefaultTimeout = new TimeSpan(0, 0, 5)
+            };
 
-        /// <summary>
-        ///     <see cref="DefaultCacheUploadLimitIsAssignedIfOneIsNotProvided" />
-        ///     ensures that a default
-        ///     <see cref="NewRelicInsightsClient.CacheUploadLimit" />
-        ///     is assigned, if one is not provided.
-        /// </summary>
-        [TestMethod]
-        public void DefaultCacheUploadLimitIsAssignedIfOneIsNotProvided()
-        {
-            Assert.AreEqual(1000, NewRelicInsightsClient.Instance.CacheUploadLimit);
-        }
+            HttpClientHandler httpClientHandler;
 
-        /// <summary>
-        ///     <see cref="CustomRecurringTaskNameIsAssignedIfProvided" /> ensures that a
-        ///     custom <see cref="NewRelicInsightsClient.RecurringTaskName" /> is assigned,
-        ///     when provided.
-        /// </summary>
-        [TestMethod]
-        public void CustomRecurringTaskNameIsAssignedIfProvided()
-        {
-            NewRelicInsightsClient.Instance.RecurringTaskName = "Custom";
+            var httpClientFactory = new HttpClientFactory();
+            var httpClient = httpClientFactory.Create(newRelicInsightsMetadata,
+                out httpClientHandler);
 
-            Assert.AreEqual("Custom", NewRelicInsightsClient.Instance.RecurringTaskName);
-        }
-
-        /// <summary>
-        ///     <see cref="CustomRecurringTaskIntervalIsAssignedIfProvided" />
-        ///     ensures that a custom
-        ///     <see cref="NewRelicInsightsClient.RecurringTaskInterval" />
-        ///     is assigned, when provided.
-        /// </summary>
-        [TestMethod]
-        public void CustomRecurringTaskIntervalIsAssignedIfProvided()
-        {
-            NewRelicInsightsClient.Instance.RecurringTaskInterval = 5;
-
-            Assert.AreEqual(5, NewRelicInsightsClient.Instance.RecurringTaskInterval);
-        }
-
-        /// <summary>
-        ///     <see cref="CustomCacheUploadLimitIsAssignedIfProvided" />
-        ///     ensures that a custom
-        ///     <see cref="NewRelicInsightsClient.CacheUploadLimit" />
-        ///     is assigned, when provided.
-        /// </summary>
-        [TestMethod]
-        public void CustomCacheUploadLimitIsAssignedIfProvided()
-        {
-            NewRelicInsightsClient.Instance.CacheUploadLimit = 2000;
-
-            Assert.AreEqual(2000, NewRelicInsightsClient.Instance.CacheUploadLimit);
-        }
-
-        /// <summary>
-        ///     <see cref="DefaultCacheUploadLimitIsAssignedIfInvalid" />
-        ///     ensures that a default
-        ///     <see cref="NewRelicInsightsClient.CacheUploadLimit" />
-        ///     is assigned, if the specified value is invalid.
-        /// </summary>
-        [TestMethod]
-        public void DefaultCacheUploadLimitIsAssignedIfInvalid()
-        {
-            NewRelicInsightsClient.Instance.CacheUploadLimit = -1;
-
-            Assert.AreEqual(1000, NewRelicInsightsClient.Instance.CacheUploadLimit);
+            Assert.AreEqual((object) newRelicInsightsMetadata.NonDefaultTimeout, httpClient.Timeout);
         }
     }
 }

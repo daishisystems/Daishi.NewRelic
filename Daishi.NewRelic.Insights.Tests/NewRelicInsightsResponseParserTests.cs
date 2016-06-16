@@ -675,9 +675,10 @@ Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
 
+using Daishi.NewRelic.Insights;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Daishi.NewRelic.Tests
+namespace Daishi.NewRelic.Insights.Tests
 {
     /// <summary>
     ///     <see cref="NewRelicInsightsResponseParserTests" /> ensures that logic

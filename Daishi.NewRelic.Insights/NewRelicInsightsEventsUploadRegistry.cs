@@ -675,63 +675,25 @@ Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
 
-using System.Net.Http;
+using FluentScheduler;
 
-namespace Daishi.NewRelic
+namespace Daishi.NewRelic.Insights
 {
     /// <summary>
-    ///     <see cref="HttpClientFactory" /> creates an instance of
-    ///     <see cref="HttpClient" />, based on an instance of
-    ///     <see cref="NewRelicInsightsMetadata" />.
+    ///     <see cref="NewRelicInsightsEventsUploadRegistry" /> is a Fluent Scheduler
+    ///     directive that initialises a recurring task that continously uploads
+    ///     <see cref="NewRelicInsightsEvent" />
+    ///     instances to New Relic Insights.
     /// </summary>
-    public class HttpClientFactory
+    internal class NewRelicInsightsEventsUploadRegistry : Registry
     {
-        /// <summary>
-        ///     <see cref="Create" /> creates an instance of
-        ///     <see cref="HttpClient" />, based on an instance of
-        ///     <see cref="NewRelicInsightsMetadata" />.
-        /// </summary>
-        /// <param name="newRelicInsightsMetadata">
-        ///     The
-        ///     <see cref="NewRelicInsightsMetadata" /> used to create a
-        ///     <see cref="HttpClient" /> instance.
-        /// </param>
-        /// <param name="httpClientHandler">
-        ///     The <see cref="HttpClientHandler" /> that acts
-        ///     as an intermediary between <see cref="HttpClient" /> and
-        ///     <see cref="NewRelicInsightsMetadata" />, during creation of a
-        ///     <see cref="HttpClient" /> instance.
-        /// </param>
-        /// <returns>
-        ///     A <see cref="HttpClient" />, based on
-        ///     <see cref="NewRelicInsightsMetadata" />.
-        /// </returns>
-        public HttpClient Create(NewRelicInsightsMetadata newRelicInsightsMetadata,
-            out HttpClientHandler httpClientHandler)
+        public NewRelicInsightsEventsUploadRegistry()
         {
-            HttpClient httpClient;
-
-            if (newRelicInsightsMetadata.UseWebProxy)
-            {
-                httpClientHandler = new HttpClientHandler
-                {
-                    UseProxy = true,
-                    Proxy = newRelicInsightsMetadata.WebProxy
-                };
-                httpClient = new HttpClient(httpClientHandler);
-            }
-            else
-            {
-                httpClientHandler = null;
-                httpClient = new HttpClient();
-            }
-
-            if (newRelicInsightsMetadata.UseNonDefaultTimeout)
-            {
-                httpClient.Timeout = newRelicInsightsMetadata.NonDefaultTimeout;
-            }
-
-            return httpClient;
+            Schedule<NewRelicInsightsEventsUploadJob>()
+                .WithName(NewRelicInsightsClient.Instance.RecurringTaskName)
+                .ToRunNow()
+                .AndEvery(NewRelicInsightsClient.Instance.RecurringTaskInterval)
+                .Minutes();
         }
     }
 }

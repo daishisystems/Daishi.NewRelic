@@ -675,25 +675,30 @@ Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
 
-using FluentScheduler;
+using System;
 
-namespace Daishi.NewRelic
+namespace Daishi.NewRelic.Insights
 {
     /// <summary>
-    ///     <see cref="NewRelicInsightsEventsUploadRegistry" /> is a Fluent Scheduler
-    ///     directive that initialises a recurring task that continously uploads
-    ///     <see cref="NewRelicInsightsEvent" />
-    ///     instances to New Relic Insights.
+    ///     <see cref="NewRelicInsightsEventUploadException" /> is thrown when events
+    ///     cannot be uploaded to New Relic Insights.
     /// </summary>
-    internal class NewRelicInsightsEventsUploadRegistry : Registry
+    public class NewRelicInsightsEventUploadException : Exception
     {
-        public NewRelicInsightsEventsUploadRegistry()
+        public NewRelicInsightsEventUploadException()
         {
-            Schedule<NewRelicInsightsEventsUploadJob>()
-                .WithName(NewRelicInsightsClient.Instance.RecurringTaskName)
-                .ToRunNow()
-                .AndEvery(NewRelicInsightsClient.Instance.RecurringTaskInterval)
-                .Minutes();
+
+        }
+
+        public NewRelicInsightsEventUploadException(string message) : base(message)
+        {
+
+        }
+
+        public NewRelicInsightsEventUploadException(string message, Exception inner)
+            : base(message, inner)
+        {
+
         }
     }
 }

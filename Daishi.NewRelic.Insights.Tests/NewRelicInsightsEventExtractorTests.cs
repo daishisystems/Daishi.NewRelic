@@ -675,54 +675,79 @@ Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
 
-using System.Net.Http.Headers;
+using System.Collections.Concurrent;
+using System.Linq;
+using Daishi.NewRelic.Insights;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Daishi.NewRelic
+namespace Daishi.NewRelic.Insights.Tests
 {
-    //ToDo: Move this into a generic HTTP-helper style project.
-
     /// <summary>
-    ///     <see cref="NewRelicInsightsCustomHttpHeaderInjecter" />" /> provides a
-    ///     means of injecting New Relic Insights API key metadata into a HTTP request
-    ///     header.
+    ///     <see cref="NewRelicInsightsEventExtractorTests" /> ensures that logic
+    ///     pertaining to <see cref="NewRelicInsightsEventExtractor" /> is executed
+    ///     correctly.
     /// </summary>
-    public static class NewRelicInsightsCustomHttpHeaderInjecter
+    [TestClass]
+    public class NewRelicInsightsEventExtractorTests
     {
         /// <summary>
-        ///     <see cref="TryInjectAPIKey" /> attempts to inject a custom HTTP header,
-        ///     composed of <see cref="headerName" /> and <see cref="headerValue" />, into
-        ///     <see cref="httpRequestHeaders" />. If successful, the New Relic Insights
-        ///     custom HTTP header will be added to <see cref="httpRequestHeaders" />.
+        ///     <see cref="NoEventsAreExtractedFromAnEmptyCache" /> ensures that 0
+        ///     <see cref="NewRelicInsightsEvent" /> instances are extracted from an empty
+        ///     cache.
         /// </summary>
-        /// <param name="headerName">The name of the custom HTTP header.</param>
-        /// <param name="headerValue">The value of the custom HTTP header.</param>
-        /// <param name="httpRequestHeaders">
-        ///     The <see cref="HttpRequestHeaders" /> to which
-        ///     the custom HTTP header should be added.
-        /// </param>
-        /// <param name="newRelicInsightsMetadataException">
-        ///     A
-        ///     <see cref="NewRelicInsightsMetadataException" /> returned if the New Relic
-        ///     custom HTTP header cannot be added.
-        /// </param>
-        /// <returns>
-        ///     <c>True</c>, if the custom HTTP header is successfully added. Otherwise,
-        ///     false.
-        /// </returns>
-        public static bool TryInjectAPIKey(string headerName, string headerValue,
-            HttpRequestHeaders httpRequestHeaders,
-            out NewRelicInsightsMetadataException newRelicInsightsMetadataException)
+        [TestMethod]
+        public void NoEventsAreExtractedFromAnEmptyCache()
         {
-            newRelicInsightsMetadataException = null;
+            var extraxtedRelicInsightsEvents =
+                NewRelicInsightsEventExtractor.ExtractNewRelicInsightsEvents(
+                    new ConcurrentQueue<NewRelicInsightsEvent>(), 1000);
 
-            var apiKeyIsAdded = httpRequestHeaders.TryAddWithoutValidation(headerName, headerValue);
+            Assert.AreEqual(0, extraxtedRelicInsightsEvents.Count());
+        }
 
-            if (apiKeyIsAdded) return true;
+        /// <summary>
+        ///     <see cref="MaximumEventsAreExtractedFromALargeCache" /> ensures that the
+        ///     maximum number of
+        ///     <see cref="NewRelicInsightsEvent" /> instances are extracted from a cache
+        ///     that holds a greater number of <see cref="NewRelicInsightsEvent" />
+        ///     instances than the maximum upload-limit (1000).
+        /// </summary>
+        [TestMethod]
+        public void MaximumEventsAreExtractedFromALargeCache()
+        {
+            var cache = new ConcurrentQueue<NewRelicInsightsEvent>();
 
-            newRelicInsightsMetadataException = new NewRelicInsightsMetadataException(
-                "The New Relic Insights API key does not conform to a valid HTTP header format.");
+            for (var i = 0; i < 1001; i++)
+            {
+                cache.Enqueue(new DummyNewRelicInsightsEvent());
+            }
 
-            return false;
+            var extraxtedRelicInsightsEvents =
+                NewRelicInsightsEventExtractor.ExtractNewRelicInsightsEvents(cache, 1000);
+
+            Assert.AreEqual(1000, extraxtedRelicInsightsEvents.Count());
+        }
+
+        /// <summary>
+        ///     <see cref="AllEventsAreExtractedFromASmallCache" /> ensures that all
+        ///     <see cref="NewRelicInsightsEvent" /> instances are extracted from a cache
+        ///     that holds a lesser number of <see cref="NewRelicInsightsEvent" />
+        ///     instances (999) than the maximum upload-limit (1000).
+        /// </summary>
+        [TestMethod]
+        public void AllEventsAreExtractedFromASmallCache()
+        {
+            var cache = new ConcurrentQueue<NewRelicInsightsEvent>();
+
+            for (var i = 0; i < 999; i++)
+            {
+                cache.Enqueue(new DummyNewRelicInsightsEvent());
+            }
+
+            var extraxtedRelicInsightsEvents =
+                NewRelicInsightsEventExtractor.ExtractNewRelicInsightsEvents(cache, 1000);
+
+            Assert.AreEqual(999, extraxtedRelicInsightsEvents.Count());
         }
     }
 }

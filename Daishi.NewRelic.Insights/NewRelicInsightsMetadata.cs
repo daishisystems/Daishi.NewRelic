@@ -678,7 +678,7 @@ Public License instead of this License.  But first, please read
 using System;
 using System.Net;
 
-namespace Daishi.NewRelic
+namespace Daishi.NewRelic.Insights
 {
     /// <summary>
     ///     <see cref="NewRelicInsightsMetadata" /> is a template that contains

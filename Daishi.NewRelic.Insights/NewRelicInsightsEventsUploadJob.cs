@@ -675,24 +675,66 @@ Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
 
-namespace Daishi.NewRelic
+using System;
+using System.Web.Hosting;
+using FluentScheduler;
+
+namespace Daishi.NewRelic.Insights
 {
     /// <summary>
-    ///     <see cref="NewRelicInsightsResponse" /> encapsulates metadata returned from
-    ///     New Relic Insights HTTP requests.
+    ///     <see cref="NewRelicInsightsEventsUploadJob" /> is a recurring task that
+    ///     continously uploads <see cref="NewRelicInsightsEvent" />
+    ///     instances to New Relic Insights.
     /// </summary>
-    public interface NewRelicInsightsResponse
+    internal class NewRelicInsightsEventsUploadJob : IJob, IRegisteredObject
     {
-        /// <summary>
-        ///     <see cref="Success" /> is <c>true</c> if the HTTP request to New Relic
-        ///     Insights was successful. Otherwise, <c>false</c>.
-        /// </summary>
-        bool Success { get; }
+        private readonly object _lock = new object();
+
+        private bool _shuttingDown;
 
         /// <summary>
-        ///     <see cref="Message" /> is a friendly message pertaining to the New Relic
-        ///     Insights HTTP response.
+        ///     <see cref="Execute" /> invokes a process that uploads cached
+        ///     <see cref="NewRelicInsightsEvent" />
+        ///     instances to New Relic Insights.
         /// </summary>
-        string Message { get; }
+        public void Execute()
+        {
+            lock (_lock)
+            {
+                if (_shuttingDown)
+                    return;
+
+                try
+                {
+                    var newRelicInsightsEvents =
+                        NewRelicInsightsEventExtractor.ExtractNewRelicInsightsEvents(
+                            NewRelicInsightsClient.Instance.NewRelicInsightsEvents,
+                            NewRelicInsightsClient.Instance.CacheUploadLimit);
+
+                    NewRelicInsightsClient.UploadEvents(newRelicInsightsEvents,
+                        new HttpClientFactory(),
+                        NewRelicInsightsClient.Instance.NewRelicInsightsMetadata);
+                }
+                catch (Exception)
+                {
+                    // ToDo: swallow error in lieu of a fallback solution, should New Relic Insights be offline.
+                }
+            }
+        }
+
+        /// <summary>Requests a registered object to unregister.</summary>
+        /// <param name="immediate">
+        ///     true to indicate the registered object should
+        ///     unregister from the hosting environment before returning; otherwise, false.
+        /// </param>
+        public void Stop(bool immediate)
+        {
+            lock (_lock)
+            {
+                _shuttingDown = true;
+            }
+
+            HostingEnvironment.UnregisterObject(this);
+        }
     }
 }

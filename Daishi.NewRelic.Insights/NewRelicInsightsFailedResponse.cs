@@ -675,96 +675,33 @@ Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
 
-using System;
+using Jil;
 
-namespace Daishi.NewRelic
+namespace Daishi.NewRelic.Insights
 {
     /// <summary>
-    ///     <see cref="NewRelicInsightsMetadataValidator" /> validates and instance of
-    ///     <see cref="NewRelicInsightsMetadata" />, ensuring that relevant properties
-    ///     are instantiated correctly.
+    ///     <see cref="NewRelicInsightsFailedResponse" /> encapsulates metadata
+    ///     returned from failed New Relic Insights HTTP requests.
     /// </summary>
-    public class NewRelicInsightsMetadataValidator
+    public class NewRelicInsightsFailedResponse : NewRelicInsightsResponse
     {
         /// <summary>
-        ///     <see cref="TryValidate" /> ensures that
-        ///     <see cref="newRelicInsightsMetadata" />
-        ///     is instantiated correctly. If any <see cref="NewRelicInsightsMetadata" />
-        ///     properties are not instantiated correctly, the method returns <c>false</c>,
-        ///     and outputs a <see cref="NewRelicInsightsMetadataException" />.
+        ///     <see cref="Error" /> represents a detailed error message pertaining to the
+        ///     New Relic Insights HTTP request failure.
         /// </summary>
-        /// <param name="newRelicInsightsMetadata">
-        ///     The
-        ///     <see cref="NewRelicInsightsMetadata" /> instance to validate.
-        /// </param>
-        /// <param name="newRelicInsightsMetadataException">
-        ///     A
-        ///     <see cref="NewRelicInsightsMetadataException" />, returned if any
-        ///     <see cref="NewRelicInsightsMetadata" /> properties are not instantiated
-        ///     correctly.
-        /// </param>
-        /// <returns>
-        ///     <c>True</c> if all <see cref="newRelicInsightsMetadata" /> properties are
-        ///     instantiated correctly.
-        /// </returns>
-        public static bool TryValidate(NewRelicInsightsMetadata newRelicInsightsMetadata,
-            out NewRelicInsightsMetadataException newRelicInsightsMetadataException)
-        {
-            newRelicInsightsMetadataException = null;
+        [JilDirective(Name = "error")]
+        public string Error { get; set; }
 
-            if (newRelicInsightsMetadata == null)
-            {
-                newRelicInsightsMetadataException =
-                    new NewRelicInsightsMetadataException(
-                        "New Relic Insights metadata not specified.");
+        /// <summary>
+        ///     <see cref="NewRelicInsightsResponse.Success" /> is <c>true</c> if the HTTP
+        ///     request to New Relic Insights was successful. Otherwise, <c>false</c>.
+        /// </summary>
+        public bool Success => false;
 
-                return false;
-            }
-
-            if (string.IsNullOrEmpty(newRelicInsightsMetadata.AccountID))
-            {
-                newRelicInsightsMetadataException =
-                    new NewRelicInsightsMetadataException("Invalid Account ID.");
-
-                return false;
-            }
-
-            if (string.IsNullOrEmpty(newRelicInsightsMetadata.APIKey))
-            {
-                newRelicInsightsMetadataException =
-                    new NewRelicInsightsMetadataException("Invalid API key.");
-
-                return false;
-            }
-
-            if (newRelicInsightsMetadata.URI == null)
-            {
-                newRelicInsightsMetadataException =
-                    new NewRelicInsightsMetadataException("URI not specified.");
-
-                return false;
-            }
-
-            if (newRelicInsightsMetadata.UseWebProxy && newRelicInsightsMetadata.WebProxy == null)
-            {
-                newRelicInsightsMetadataException =
-                    new NewRelicInsightsMetadataException(
-                        "UseWebProxy is true, but no proxy is specified.");
-
-                return false;
-            }
-
-            if (newRelicInsightsMetadata.UseNonDefaultTimeout &&
-                newRelicInsightsMetadata.NonDefaultTimeout == TimeSpan.Zero)
-            {
-                newRelicInsightsMetadataException =
-                    new NewRelicInsightsMetadataException(
-                        "UseNonDefaultTimeout is true, but no timeout is specified.");
-
-                return false;
-            }
-
-            return true;
-        }
+        /// <summary>
+        ///     <see cref="NewRelicInsightsResponse.Message" /> is a friendly message
+        ///     pertaining to the New Relic Insights HTTP response.
+        /// </summary>
+        public string Message => Error;
     }
 }

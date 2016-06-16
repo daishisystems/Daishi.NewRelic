@@ -675,30 +675,60 @@ Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
 
-using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 
-namespace Daishi.NewRelic
+namespace Daishi.NewRelic.Insights
 {
     /// <summary>
-    ///     <see cref="UnableToParseNewRelicInsightsResponseException" /> is thrown
-    ///     when a HTTP response from New Relic Insights cannot be parsed.
+    ///     <see cref="NewRelicInsightsEventExtractor" /> provides a means of extracing
+    ///     <see cref="NewRelicInsightsEvent" /> instances from a cache of
+    ///     <see cref="NewRelicInsightsEvent" /> instances.
     /// </summary>
-    public class UnableToParseNewRelicInsightsResponseException : Exception
+    public class NewRelicInsightsEventExtractor
     {
-        public UnableToParseNewRelicInsightsResponseException()
+        /// <summary>
+        ///     <see cref="ExtractNewRelicInsightsEvents" /> de-queues
+        ///     <see cref="NewRelicInsightsEvent" /> instances from
+        ///     <see cref="newRelicInsightsEvents" /> to a maximum limit of
+        ///     <see cref="cacheUploadLimit" />, and returns each
+        ///     <see cref="NewRelicInsightsEvent" /> in an enumerable collection.
+        /// </summary>
+        /// <param name="newRelicInsightsEvents">The queue of
+        ///     <see cref="NewRelicInsightsEvent" /> instances from which to extract
+        ///     <see cref="NewRelicInsightsEvent" /> instances.</param>
+        /// <param name="cacheUploadLimit">The maximum number of
+        ///     <see cref="NewRelicInsightsEvent" /> instances to be extracted.</param>
+        /// <returns>
+        ///     <see cref="IEnumerable{T}" />, a collection of extracted
+        ///     <see cref="NewRelicInsightsEvent" /> instances.
+        /// </returns>
+        public static IEnumerable<NewRelicInsightsEvent> ExtractNewRelicInsightsEvents(
+            ConcurrentQueue<NewRelicInsightsEvent> newRelicInsightsEvents,
+            int cacheUploadLimit)
         {
+            var extractedNewRelicInsightsEvents = new List<NewRelicInsightsEvent>();
 
-        }
+            if (newRelicInsightsEvents.IsEmpty) return extractedNewRelicInsightsEvents;
 
-        public UnableToParseNewRelicInsightsResponseException(string message) : base(message)
-        {
+            var numEventsExtracted = 0;
 
-        }
+            do
+            {
+                NewRelicInsightsEvent newRelicInsightsEvent;
 
-        public UnableToParseNewRelicInsightsResponseException(string message, Exception inner)
-            : base(message, inner)
-        {
+                var hasDequeuedNextEvent =
+                    newRelicInsightsEvents.TryDequeue(out newRelicInsightsEvent);
 
+                if (hasDequeuedNextEvent)
+                {
+                    extractedNewRelicInsightsEvents.Add(newRelicInsightsEvent);
+                }
+
+                numEventsExtracted++;
+            } while (!newRelicInsightsEvents.IsEmpty && numEventsExtracted < cacheUploadLimit);
+
+            return extractedNewRelicInsightsEvents;
         }
     }
 }

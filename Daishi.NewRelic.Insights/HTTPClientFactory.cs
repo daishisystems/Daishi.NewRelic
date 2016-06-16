@@ -675,27 +675,63 @@ Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
 
-using Jil;
+using System.Net.Http;
 
-namespace Daishi.NewRelic
+namespace Daishi.NewRelic.Insights
 {
     /// <summary>
-    ///     <see cref="NewRelicInsightsSuccessfulResponse" /> encapsulates metadata
-    ///     returned from successful New Relic Insights HTTP requests.
+    ///     <see cref="HttpClientFactory" /> creates an instance of
+    ///     <see cref="HttpClient" />, based on an instance of
+    ///     <see cref="NewRelicInsightsMetadata" />.
     /// </summary>
-    public class NewRelicInsightsSuccessfulResponse : NewRelicInsightsResponse
+    public class HttpClientFactory
     {
         /// <summary>
-        ///     <see cref="NewRelicInsightsResponse.Success" /> is <c>true</c> if the HTTP
-        ///     request to New Relic Insights was successful. Otherwise, <c>false</c>.
+        ///     <see cref="Create" /> creates an instance of
+        ///     <see cref="HttpClient" />, based on an instance of
+        ///     <see cref="NewRelicInsightsMetadata" />.
         /// </summary>
-        [JilDirective(Name = "success")]
-        public bool Success { get; set; }
+        /// <param name="newRelicInsightsMetadata">
+        ///     The
+        ///     <see cref="NewRelicInsightsMetadata" /> used to create a
+        ///     <see cref="HttpClient" /> instance.
+        /// </param>
+        /// <param name="httpClientHandler">
+        ///     The <see cref="HttpClientHandler" /> that acts
+        ///     as an intermediary between <see cref="HttpClient" /> and
+        ///     <see cref="NewRelicInsightsMetadata" />, during creation of a
+        ///     <see cref="HttpClient" /> instance.
+        /// </param>
+        /// <returns>
+        ///     A <see cref="HttpClient" />, based on
+        ///     <see cref="NewRelicInsightsMetadata" />.
+        /// </returns>
+        public HttpClient Create(NewRelicInsightsMetadata newRelicInsightsMetadata,
+            out HttpClientHandler httpClientHandler)
+        {
+            HttpClient httpClient;
 
-        /// <summary>
-        ///     <see cref="NewRelicInsightsResponse.Message" /> is a friendly message
-        ///     pertaining to the New Relic Insights HTTP response.
-        /// </summary>
-        public string Message => "Success";
+            if (newRelicInsightsMetadata.UseWebProxy)
+            {
+                httpClientHandler = new HttpClientHandler
+                {
+                    UseProxy = true,
+                    Proxy = newRelicInsightsMetadata.WebProxy
+                };
+                httpClient = new HttpClient(httpClientHandler);
+            }
+            else
+            {
+                httpClientHandler = null;
+                httpClient = new HttpClient();
+            }
+
+            if (newRelicInsightsMetadata.UseNonDefaultTimeout)
+            {
+                httpClient.Timeout = newRelicInsightsMetadata.NonDefaultTimeout;
+            }
+
+            return httpClient;
+        }
     }
 }

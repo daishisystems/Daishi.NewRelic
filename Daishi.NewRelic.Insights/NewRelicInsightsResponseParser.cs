@@ -676,65 +676,60 @@ Public License instead of this License.  But first, please read
 */
 
 using System;
-using System.Web.Hosting;
-using FluentScheduler;
+using System.IO;
+using Jil;
 
-namespace Daishi.NewRelic
+namespace Daishi.NewRelic.Insights
 {
     /// <summary>
-    ///     <see cref="NewRelicInsightsEventsUploadJob" /> is a recurring task that
-    ///     continously uploads <see cref="NewRelicInsightsEvent" />
-    ///     instances to New Relic Insights.
+    ///     <see cref="NewRelicInsightsResponseParser" /> provides a means of parsing
+    ///     New Relic Insights HTTP responses.
     /// </summary>
-    internal class NewRelicInsightsEventsUploadJob : IJob, IRegisteredObject
+    public static class NewRelicInsightsResponseParser
     {
-        private readonly object _lock = new object();
-
-        private bool _shuttingDown;
-
         /// <summary>
-        ///     <see cref="Execute" /> invokes a process that uploads cached
-        ///     <see cref="NewRelicInsightsEvent" />
-        ///     instances to New Relic Insights.
+        ///     <see cref="NewRelicInsightsResponseParser" /> parses
+        ///     <see cref="httpResponseContent" /> and returns and appropriate instance of
+        ///     <see cref="NewRelicInsightsResponse" />, depending on success or failure.
         /// </summary>
-        public void Execute()
+        /// <param name="isSuccessStatusCode">
+        ///     <c>True</c>, if the HTTP status code that yielded
+        ///     <see cref="httpResponseContent" /> was successful.
+        /// </param>
+        /// <param name="httpResponseContent">
+        ///     The content returned from a HTTP request to
+        ///     New Relic Insights.
+        /// </param>
+        /// <returns>
+        ///     An instance of <see cref="NewRelicInsightsSuccessfulResponse" />, if
+        ///     <see cref="isSuccessStatusCode" /> is <c>true</c>. Otherwise, an instance
+        ///     of <see cref="NewRelicInsightsFailedResponse" />.
+        /// </returns>
+        /// <remarks>
+        ///     Throws an
+        ///     <see cref="UnableToParseNewRelicInsightsResponseException" />, if
+        ///     <see cref="httpResponseContent" /> could not be parsed.
+        /// </remarks>
+        public static NewRelicInsightsResponse Parse(bool isSuccessStatusCode,
+            string httpResponseContent)
         {
-            lock (_lock)
+            using (var reader = new StringReader(httpResponseContent))
             {
-                if (_shuttingDown)
-                    return;
-
                 try
                 {
-                    var newRelicInsightsEvents =
-                        NewRelicInsightsEventExtractor.ExtractNewRelicInsightsEvents(
-                            NewRelicInsightsClient.Instance.NewRelicInsightsEvents,
-                            NewRelicInsightsClient.Instance.CacheUploadLimit);
+                    if (isSuccessStatusCode)
+                    {
+                        return JSON.Deserialize<NewRelicInsightsSuccessfulResponse>(
+                            reader.ReadToEnd());
+                    }
 
-                    NewRelicInsightsClient.UploadEvents(newRelicInsightsEvents,
-                        new HttpClientFactory(),
-                        NewRelicInsightsClient.Instance.NewRelicInsightsMetadata);
+                    return JSON.Deserialize<NewRelicInsightsFailedResponse>(reader.ReadToEnd());
                 }
-                catch (Exception)
+                catch (Exception exception)
                 {
-                    // ToDo: swallow error in lieu of a fallback solution, should New Relic Insights be offline.
+                    throw new UnableToParseNewRelicInsightsResponseException(exception.Message);
                 }
             }
-        }
-
-        /// <summary>Requests a registered object to unregister.</summary>
-        /// <param name="immediate">
-        ///     true to indicate the registered object should
-        ///     unregister from the hosting environment before returning; otherwise, false.
-        /// </param>
-        public void Stop(bool immediate)
-        {
-            lock (_lock)
-            {
-                _shuttingDown = true;
-            }
-
-            HostingEnvironment.UnregisterObject(this);
         }
     }
 }

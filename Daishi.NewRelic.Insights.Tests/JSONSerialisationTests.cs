@@ -675,82 +675,42 @@ Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
 
-using System;
-using System.Net;
-using System.Net.Http;
+using System.IO;
+using Jil;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Daishi.NewRelic.Tests
+namespace Daishi.NewRelic.Insights.Tests
 {
     /// <summary>
-    ///     <see cref="HttpClientFactoryTests" /> ensures that logic pertaining to
-    ///     <see cref="HttpClientFactory" /> executes correctly.
+    ///     <see cref="JSONSerialisationTests" /> ensures that New Relic Insights
+    ///     events are serialised in the correct format, pertaining to New Relic
+    ///     Insights requirements.
     /// </summary>
     [TestClass]
-    public class HttpClientFactoryTests
+    public class JSONSerialisationTests
     {
         /// <summary>
-        ///     <see cref="HttpClientWithProxyIsCreated" /> ensures that a
-        ///     <see cref="HttpClient" /> instance is created, with the specified proxy
-        ///     server.
+        ///     <see cref="JilSerialiserCorrectlyAppliesCasing" /> ensures that
+        ///     <see cref="NewRelicInsightsEvent.EventType" /> is serialised in Camel case.
         /// </summary>
         [TestMethod]
-        public void HttpClientWithProxyIsCreated()
+        public void JilSerialiserCorrectlyAppliesCasing()
         {
-            var newRelicInsightsMetadata = new NewRelicInsightsMetadata
+            var dummyNewRelicInsightsEvent = new DummyNewRelicInsightsEvent
             {
-                UseWebProxy = true,
-                WebProxy = new WebProxy(new Uri("http://localhost"))
+                EventType = "MockEventType"
             };
 
-            HttpClientHandler httpClientHandler;
-
-            var httpClientFactory = new HttpClientFactory();
-            httpClientFactory.Create(newRelicInsightsMetadata, out httpClientHandler);
-
-            Assert.IsTrue(httpClientHandler.UseProxy);
-            Assert.AreEqual(newRelicInsightsMetadata.WebProxy, httpClientHandler.Proxy);
-        }
-
-        /// <summary>
-        ///     <see cref="HttpClientWithoutProxyIsCreated" /> ensures that a
-        ///     <see cref="HttpClient" /> instance is created, with no specified proxy
-        ///     server.
-        /// </summary>
-        [TestMethod]
-        public void HttpClientWithoutProxyIsCreated()
-        {
-            var newRelicInsightsMetadata = new NewRelicInsightsMetadata();
-
-            HttpClientHandler httpClientHandler;
-
-            var httpClientFactory = new HttpClientFactory();
-            httpClientFactory.Create(newRelicInsightsMetadata, out httpClientHandler);
-
-            Assert.IsNull(httpClientHandler);
-            Assert.IsNotNull(newRelicInsightsMetadata);
-        }
-
-        /// <summary>
-        ///     <see cref="HttpClientWithNonDefaultTimeoutIsCreated" /> ensures that a
-        ///     <see cref="HttpClient" /> instance is created, with a non-default timeout.
-        /// </summary>
-        [TestMethod]
-        public void HttpClientWithNonDefaultTimeoutIsCreated()
-        {
-            var newRelicInsightsMetadata = new NewRelicInsightsMetadata
+            using (var stringWriter = new StringWriter())
             {
-                UseNonDefaultTimeout = true,
-                NonDefaultTimeout = new TimeSpan(0, 0, 5)
-            };
+                JSON.Serialize(dummyNewRelicInsightsEvent, stringWriter);
 
-            HttpClientHandler httpClientHandler;
+                var serialisedMetadata = stringWriter.ToString();
 
-            var httpClientFactory = new HttpClientFactory();
-            var httpClient = httpClientFactory.Create(newRelicInsightsMetadata,
-                out httpClientHandler);
+                var casingIsCorrectlyApplied = serialisedMetadata.Contains("eventType");
 
-            Assert.AreEqual((object) newRelicInsightsMetadata.NonDefaultTimeout, httpClient.Timeout);
+                Assert.IsTrue(casingIsCorrectlyApplied);
+            }
         }
     }
 }

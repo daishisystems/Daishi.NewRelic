@@ -675,30 +675,54 @@ Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
 
-using System;
+using System.Net.Http.Headers;
 
-namespace Daishi.NewRelic
+namespace Daishi.NewRelic.Insights
 {
+    //ToDo: Move this into a generic HTTP-helper style project.
+
     /// <summary>
-    ///     <see cref="NewRelicInsightsEventUploadException" /> is thrown when events
-    ///     cannot be uploaded to New Relic Insights.
+    ///     <see cref="NewRelicInsightsCustomHttpHeaderInjecter" />" /> provides a
+    ///     means of injecting New Relic Insights API key metadata into a HTTP request
+    ///     header.
     /// </summary>
-    public class NewRelicInsightsEventUploadException : Exception
+    public static class NewRelicInsightsCustomHttpHeaderInjecter
     {
-        public NewRelicInsightsEventUploadException()
+        /// <summary>
+        ///     <see cref="TryInjectAPIKey" /> attempts to inject a custom HTTP header,
+        ///     composed of <see cref="headerName" /> and <see cref="headerValue" />, into
+        ///     <see cref="httpRequestHeaders" />. If successful, the New Relic Insights
+        ///     custom HTTP header will be added to <see cref="httpRequestHeaders" />.
+        /// </summary>
+        /// <param name="headerName">The name of the custom HTTP header.</param>
+        /// <param name="headerValue">The value of the custom HTTP header.</param>
+        /// <param name="httpRequestHeaders">
+        ///     The <see cref="HttpRequestHeaders" /> to which
+        ///     the custom HTTP header should be added.
+        /// </param>
+        /// <param name="newRelicInsightsMetadataException">
+        ///     A
+        ///     <see cref="NewRelicInsightsMetadataException" /> returned if the New Relic
+        ///     custom HTTP header cannot be added.
+        /// </param>
+        /// <returns>
+        ///     <c>True</c>, if the custom HTTP header is successfully added. Otherwise,
+        ///     false.
+        /// </returns>
+        public static bool TryInjectAPIKey(string headerName, string headerValue,
+            HttpRequestHeaders httpRequestHeaders,
+            out NewRelicInsightsMetadataException newRelicInsightsMetadataException)
         {
+            newRelicInsightsMetadataException = null;
 
-        }
+            var apiKeyIsAdded = httpRequestHeaders.TryAddWithoutValidation(headerName, headerValue);
 
-        public NewRelicInsightsEventUploadException(string message) : base(message)
-        {
+            if (apiKeyIsAdded) return true;
 
-        }
+            newRelicInsightsMetadataException = new NewRelicInsightsMetadataException(
+                "The New Relic Insights API key does not conform to a valid HTTP header format.");
 
-        public NewRelicInsightsEventUploadException(string message, Exception inner)
-            : base(message, inner)
-        {
-
+            return false;
         }
     }
 }

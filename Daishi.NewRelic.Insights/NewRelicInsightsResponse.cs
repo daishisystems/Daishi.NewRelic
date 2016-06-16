@@ -675,62 +675,24 @@ Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
 
-using System.Net.Http;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-namespace Daishi.NewRelic.Tests
+namespace Daishi.NewRelic.Insights
 {
-    // ToDo: I may have assigned "IsInstanceOf" in Aegis, whereas I should have leveraged ISNotNull.
-
     /// <summary>
-    ///     <see cref="NewRelicInsightsCustomHttpHeaderInjecterTests" /> ensures that
-    ///     logic pertaining to <see cref="NewRelicInsightsCustomHttpHeaderInjecter" />
-    ///     is executed correctly.
+    ///     <see cref="NewRelicInsightsResponse" /> encapsulates metadata returned from
+    ///     New Relic Insights HTTP requests.
     /// </summary>
-    [TestClass]
-    public class NewRelicInsightsCustomHttpHeaderInjecterTests
+    public interface NewRelicInsightsResponse
     {
         /// <summary>
-        ///     <see cref="CorrectlyFormattedAPIKeyHttpHeaderIsAddedSuccessfully" />
-        ///     ensures that a correctly-formatted New Relic Insights API key HTTP header
-        ///     is successfully added to a collection of HTTP headers.
+        ///     <see cref="Success" /> is <c>true</c> if the HTTP request to New Relic
+        ///     Insights was successful. Otherwise, <c>false</c>.
         /// </summary>
-        [TestMethod]
-        public void CorrectlyFormattedAPIKeyHttpHeaderIsAddedSuccessfully()
-        {
-            using (var httpClient = new HttpClient())
-            {
-                NewRelicInsightsMetadataException newRelicInsightsMetadataException;
-
-                var apiKeyIsAdded = NewRelicInsightsCustomHttpHeaderInjecter.TryInjectAPIKey(
-                    "X-Insert-Key",
-                    "8SxYVNy5QZRcObSbbnQRG9btz07EL0Vc",
-                    httpClient.DefaultRequestHeaders, out newRelicInsightsMetadataException);
-
-                Assert.IsTrue(apiKeyIsAdded);
-            }
-        }
+        bool Success { get; }
 
         /// <summary>
-        ///     <see cref="IncorrectlyFormattedAPIKeyHttpHeaderIsNotAddedSuccessfully" />
-        ///     ensures that an incorrectly-formatted New Relic Insights API key HTTP
-        ///     header is not added to a collection of HTTP headers.
+        ///     <see cref="Message" /> is a friendly message pertaining to the New Relic
+        ///     Insights HTTP response.
         /// </summary>
-        [TestMethod]
-        public void IncorrectlyFormattedAPIKeyHttpHeaderIsNotAddedSuccessfully()
-        {
-            using (var httpClient = new HttpClient())
-            {
-                NewRelicInsightsMetadataException newRelicInsightsMetadataException;
-
-                var apiKeyIsAdded = NewRelicInsightsCustomHttpHeaderInjecter.TryInjectAPIKey(
-                    string.Empty,
-                    "8SxYVNy5QZRcObSbbnQRG9btz07EL0Vc",
-                    httpClient.DefaultRequestHeaders, out newRelicInsightsMetadataException);
-
-                Assert.IsFalse(apiKeyIsAdded);
-                Assert.IsNotNull(newRelicInsightsMetadataException);
-            }
-        }
+        string Message { get; }
     }
 }

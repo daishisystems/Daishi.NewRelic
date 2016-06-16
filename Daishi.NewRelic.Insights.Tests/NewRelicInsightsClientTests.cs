@@ -675,78 +675,121 @@ Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
 
-using System.Collections.Concurrent;
-using System.Linq;
+using Daishi.NewRelic.Insights;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Daishi.NewRelic.Tests
+namespace Daishi.NewRelic.Insights.Tests
 {
     /// <summary>
-    ///     <see cref="NewRelicInsightsEventExtractorTests" /> ensures that logic
-    ///     pertaining to <see cref="NewRelicInsightsEventExtractor" /> is executed
-    ///     correctly.
+    ///     <see cref="NewRelicInsightsClientTests" /> ensures that logic pertaining to
+    ///     <see cref="NewRelicInsightsClient" /> instances is executed correctly.
     /// </summary>
     [TestClass]
-    public class NewRelicInsightsEventExtractorTests
+    public class NewRelicInsightsClientTests
     {
         /// <summary>
-        ///     <see cref="NoEventsAreExtractedFromAnEmptyCache" /> ensures that 0
-        ///     <see cref="NewRelicInsightsEvent" /> instances are extracted from an empty
-        ///     cache.
+        ///     <see cref="NewRelicInsightsEventIsAddedToCache" /> ensures that instances
+        ///     of <see cref="NewRelicInsightsEvent" /> are added to
+        ///     <see cref="NewRelicInsightsClient.NewRelicInsightsEvents" />.
         /// </summary>
         [TestMethod]
-        public void NoEventsAreExtractedFromAnEmptyCache()
+        public void NewRelicInsightsEventIsAddedToCache()
         {
-            var extraxtedRelicInsightsEvents =
-                NewRelicInsightsEventExtractor.ExtractNewRelicInsightsEvents(
-                    new ConcurrentQueue<NewRelicInsightsEvent>(), 1000);
+            var dummyNewRelicInsightsEvent = new DummyNewRelicInsightsEvent();
 
-            Assert.AreEqual(0, extraxtedRelicInsightsEvents.Count());
+            NewRelicInsightsClient.Instance.AddNewRelicInsightEvent(dummyNewRelicInsightsEvent);
+
+            Assert.AreEqual(1, NewRelicInsightsClient.Instance.NewRelicInsightsEvents.Count);
         }
 
         /// <summary>
-        ///     <see cref="MaximumEventsAreExtractedFromALargeCache" /> ensures that the
-        ///     maximum number of
-        ///     <see cref="NewRelicInsightsEvent" /> instances are extracted from a cache
-        ///     that holds a greater number of <see cref="NewRelicInsightsEvent" />
-        ///     instances than the maximum upload-limit (1000).
+        ///     <see cref="DefaultRecurringTaskNameIsAssignedIfOneIsNotProvided" /> ensures
+        ///     that a default <see cref="NewRelicInsightsClient.RecurringTaskName" /> is
+        ///     assigned, if one is not provided.
         /// </summary>
         [TestMethod]
-        public void MaximumEventsAreExtractedFromALargeCache()
+        public void DefaultRecurringTaskNameIsAssignedIfOneIsNotProvided()
         {
-            var cache = new ConcurrentQueue<NewRelicInsightsEvent>();
-
-            for (var i = 0; i < 1001; i++)
-            {
-                cache.Enqueue(new DummyNewRelicInsightsEvent());
-            }
-
-            var extraxtedRelicInsightsEvents =
-                NewRelicInsightsEventExtractor.ExtractNewRelicInsightsEvents(cache, 1000);
-
-            Assert.AreEqual(1000, extraxtedRelicInsightsEvents.Count());
+            Assert.AreEqual("UploadEvents", NewRelicInsightsClient.Instance.RecurringTaskName);
         }
 
         /// <summary>
-        ///     <see cref="AllEventsAreExtractedFromASmallCache" /> ensures that all
-        ///     <see cref="NewRelicInsightsEvent" /> instances are extracted from a cache
-        ///     that holds a lesser number of <see cref="NewRelicInsightsEvent" />
-        ///     instances (999) than the maximum upload-limit (1000).
+        ///     <see cref="DefaultRecurringTaskIntervalIsAssignedIfOneIsNotProvided" />
+        ///     ensures that a default
+        ///     <see cref="NewRelicInsightsClient.RecurringTaskInterval" />
+        ///     is assigned, if one is not provided.
         /// </summary>
         [TestMethod]
-        public void AllEventsAreExtractedFromASmallCache()
+        public void DefaultRecurringTaskIntervalIsAssignedIfOneIsNotProvided()
         {
-            var cache = new ConcurrentQueue<NewRelicInsightsEvent>();
+            Assert.AreEqual(1, NewRelicInsightsClient.Instance.RecurringTaskInterval);
+        }
 
-            for (var i = 0; i < 999; i++)
-            {
-                cache.Enqueue(new DummyNewRelicInsightsEvent());
-            }
+        /// <summary>
+        ///     <see cref="DefaultCacheUploadLimitIsAssignedIfOneIsNotProvided" />
+        ///     ensures that a default
+        ///     <see cref="NewRelicInsightsClient.CacheUploadLimit" />
+        ///     is assigned, if one is not provided.
+        /// </summary>
+        [TestMethod]
+        public void DefaultCacheUploadLimitIsAssignedIfOneIsNotProvided()
+        {
+            Assert.AreEqual(1000, NewRelicInsightsClient.Instance.CacheUploadLimit);
+        }
 
-            var extraxtedRelicInsightsEvents =
-                NewRelicInsightsEventExtractor.ExtractNewRelicInsightsEvents(cache, 1000);
+        /// <summary>
+        ///     <see cref="CustomRecurringTaskNameIsAssignedIfProvided" /> ensures that a
+        ///     custom <see cref="NewRelicInsightsClient.RecurringTaskName" /> is assigned,
+        ///     when provided.
+        /// </summary>
+        [TestMethod]
+        public void CustomRecurringTaskNameIsAssignedIfProvided()
+        {
+            NewRelicInsightsClient.Instance.RecurringTaskName = "Custom";
 
-            Assert.AreEqual(999, extraxtedRelicInsightsEvents.Count());
+            Assert.AreEqual("Custom", NewRelicInsightsClient.Instance.RecurringTaskName);
+        }
+
+        /// <summary>
+        ///     <see cref="CustomRecurringTaskIntervalIsAssignedIfProvided" />
+        ///     ensures that a custom
+        ///     <see cref="NewRelicInsightsClient.RecurringTaskInterval" />
+        ///     is assigned, when provided.
+        /// </summary>
+        [TestMethod]
+        public void CustomRecurringTaskIntervalIsAssignedIfProvided()
+        {
+            NewRelicInsightsClient.Instance.RecurringTaskInterval = 5;
+
+            Assert.AreEqual(5, NewRelicInsightsClient.Instance.RecurringTaskInterval);
+        }
+
+        /// <summary>
+        ///     <see cref="CustomCacheUploadLimitIsAssignedIfProvided" />
+        ///     ensures that a custom
+        ///     <see cref="NewRelicInsightsClient.CacheUploadLimit" />
+        ///     is assigned, when provided.
+        /// </summary>
+        [TestMethod]
+        public void CustomCacheUploadLimitIsAssignedIfProvided()
+        {
+            NewRelicInsightsClient.Instance.CacheUploadLimit = 2000;
+
+            Assert.AreEqual(2000, NewRelicInsightsClient.Instance.CacheUploadLimit);
+        }
+
+        /// <summary>
+        ///     <see cref="DefaultCacheUploadLimitIsAssignedIfInvalid" />
+        ///     ensures that a default
+        ///     <see cref="NewRelicInsightsClient.CacheUploadLimit" />
+        ///     is assigned, if the specified value is invalid.
+        /// </summary>
+        [TestMethod]
+        public void DefaultCacheUploadLimitIsAssignedIfInvalid()
+        {
+            NewRelicInsightsClient.Instance.CacheUploadLimit = -1;
+
+            Assert.AreEqual(1000, NewRelicInsightsClient.Instance.CacheUploadLimit);
         }
     }
 }

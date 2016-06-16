@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Daishi.NewRelic", "Daishi.NewRelic\Daishi.NewRelic.csproj", "{02BCE6A0-FF01-4880-B9CF-B17A1FCB0922}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Daishi.NewRelic.Tests", "Daishi.NewRelic.Tests\Daishi.NewRelic.Tests.csproj", "{2A524370-1F98-41E0-AD74-D934911E8235}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Daishi.NewRelic.Insights.SampleApp", "Daishi.NewRelic.Insights.SampleApp\Daishi.NewRelic.Insights.SampleApp.csproj", "{FF6461E8-86D0-4707-8399-0878F771A2BD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Daishi.NewRelic.Insights", "Daishi.NewRelic.Insights\Daishi.NewRelic.Insights.csproj", "{02BCE6A0-FF01-4880-B9CF-B17A1FCB0922}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Daishi.NewRelic.Insights.Tests", "Daishi.NewRelic.Insights.Tests\Daishi.NewRelic.Insights.Tests.csproj", "{2A524370-1F98-41E0-AD74-D934911E8235}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +15,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FF6461E8-86D0-4707-8399-0878F771A2BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF6461E8-86D0-4707-8399-0878F771A2BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF6461E8-86D0-4707-8399-0878F771A2BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF6461E8-86D0-4707-8399-0878F771A2BD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{02BCE6A0-FF01-4880-B9CF-B17A1FCB0922}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{02BCE6A0-FF01-4880-B9CF-B17A1FCB0922}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{02BCE6A0-FF01-4880-B9CF-B17A1FCB0922}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -23,10 +27,6 @@ Global
 		{2A524370-1F98-41E0-AD74-D934911E8235}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2A524370-1F98-41E0-AD74-D934911E8235}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2A524370-1F98-41E0-AD74-D934911E8235}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FF6461E8-86D0-4707-8399-0878F771A2BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FF6461E8-86D0-4707-8399-0878F771A2BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FF6461E8-86D0-4707-8399-0878F771A2BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FF6461E8-86D0-4707-8399-0878F771A2BD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

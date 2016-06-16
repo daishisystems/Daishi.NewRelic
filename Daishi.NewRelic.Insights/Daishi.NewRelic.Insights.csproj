@@ -7,8 +7,8 @@
     <ProjectGuid>{02BCE6A0-FF01-4880-B9CF-B17A1FCB0922}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Daishi.NewRelic</RootNamespace>
-    <AssemblyName>Daishi.NewRelic</AssemblyName>
+    <RootNamespace>Daishi.NewRelic.Insights</RootNamespace>
+    <AssemblyName>Daishi.NewRelic.Insights</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -74,7 +74,7 @@
     <Compile Include="NewRelicInsightsEventsUploadRegistry.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Aegis.Monitor.Core.licenseheader" />
+    <None Include="Daishi.NewRelic.Insights.licenseheader" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

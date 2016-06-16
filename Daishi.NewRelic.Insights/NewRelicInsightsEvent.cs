@@ -675,60 +675,27 @@ Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
 
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-
-namespace Daishi.NewRelic
+namespace Daishi.NewRelic.Insights
 {
-    /// <summary>
-    ///     <see cref="NewRelicInsightsEventExtractor" /> provides a means of extracing
-    ///     <see cref="NewRelicInsightsEvent" /> instances from a cache of
-    ///     <see cref="NewRelicInsightsEvent" /> instances.
-    /// </summary>
-    public class NewRelicInsightsEventExtractor
+    public interface NewRelicInsightsEvent
     {
         /// <summary>
-        ///     <see cref="ExtractNewRelicInsightsEvents" /> de-queues
-        ///     <see cref="NewRelicInsightsEvent" /> instances from
-        ///     <see cref="newRelicInsightsEvents" /> to a maximum limit of
-        ///     <see cref="cacheUploadLimit" />, and returns each
-        ///     <see cref="NewRelicInsightsEvent" /> in an enumerable collection.
+        ///     EventType is the New Relic Insights Event Grouping. It determines the
+        ///     database to which the event will persist.
         /// </summary>
-        /// <param name="newRelicInsightsEvents">The queue of
-        ///     <see cref="NewRelicInsightsEvent" /> instances from which to extract
-        ///     <see cref="NewRelicInsightsEvent" /> instances.</param>
-        /// <param name="cacheUploadLimit">The maximum number of
-        ///     <see cref="NewRelicInsightsEvent" /> instances to be extracted.</param>
-        /// <returns>
-        ///     <see cref="IEnumerable{T}" />, a collection of extracted
-        ///     <see cref="NewRelicInsightsEvent" /> instances.
-        /// </returns>
-        public static IEnumerable<NewRelicInsightsEvent> ExtractNewRelicInsightsEvents(
-            ConcurrentQueue<NewRelicInsightsEvent> newRelicInsightsEvents,
-            int cacheUploadLimit)
-        {
-            var extractedNewRelicInsightsEvents = new List<NewRelicInsightsEvent>();
-
-            if (newRelicInsightsEvents.IsEmpty) return extractedNewRelicInsightsEvents;
-
-            var numEventsExtracted = 0;
-
-            do
-            {
-                NewRelicInsightsEvent newRelicInsightsEvent;
-
-                var hasDequeuedNextEvent =
-                    newRelicInsightsEvents.TryDequeue(out newRelicInsightsEvent);
-
-                if (hasDequeuedNextEvent)
-                {
-                    extractedNewRelicInsightsEvents.Add(newRelicInsightsEvent);
-                }
-
-                numEventsExtracted++;
-            } while (!newRelicInsightsEvents.IsEmpty && numEventsExtracted < cacheUploadLimit);
-
-            return extractedNewRelicInsightsEvents;
-        }
+        /// <remarks>
+        ///     <para>
+        ///         <see cref="EventType" /><c>must</c> be serialised in Camel case, in
+        ///         order to be correctly interpreted by New Relic Insights.
+        ///     </para>
+        ///     <para>
+        ///         Apply the following attribute to the <see cref="EventType" />
+        ///         property in your implementation:
+        ///     </para>
+        ///     <para>
+        ///         <c>[JilDirective(Name = "eventType")]</c>
+        ///     </para>
+        /// </remarks>
+        string EventType { get; set; }
     }
 }
