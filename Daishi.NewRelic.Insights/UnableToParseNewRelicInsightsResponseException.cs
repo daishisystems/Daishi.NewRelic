@@ -683,6 +683,7 @@ namespace Daishi.NewRelic.Insights
     ///     <see cref="UnableToParseNewRelicInsightsResponseException" /> is thrown
     ///     when a HTTP response from New Relic Insights cannot be parsed.
     /// </summary>
+    [Serializable]
     public class UnableToParseNewRelicInsightsResponseException : Exception
     {
         public UnableToParseNewRelicInsightsResponseException()

@@ -677,7 +677,6 @@ Public License instead of this License.  But first, please read
 
 using System.Collections.Concurrent;
 using System.Linq;
-using Daishi.NewRelic.Insights;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Daishi.NewRelic.Insights.Tests

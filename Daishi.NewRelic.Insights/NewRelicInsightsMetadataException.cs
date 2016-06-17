@@ -685,6 +685,7 @@ namespace Daishi.NewRelic.Insights
     ///     omitted properties, is used to establish a connection to New Relic
     ///     Insights.
     /// </summary>
+    [Serializable]
     public class NewRelicInsightsMetadataException : Exception
     {
         public NewRelicInsightsMetadataException()

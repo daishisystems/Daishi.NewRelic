@@ -676,7 +676,6 @@ Public License instead of this License.  But first, please read
 */
 
 using System.Net.Http;
-using Daishi.NewRelic.Insights;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Daishi.NewRelic.Insights.Tests

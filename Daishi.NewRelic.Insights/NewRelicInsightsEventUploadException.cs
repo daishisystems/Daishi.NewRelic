@@ -683,6 +683,7 @@ namespace Daishi.NewRelic.Insights
     ///     <see cref="NewRelicInsightsEventUploadException" /> is thrown when events
     ///     cannot be uploaded to New Relic Insights.
     /// </summary>
+    [Serializable]
     public class NewRelicInsightsEventUploadException : Exception
     {
         public NewRelicInsightsEventUploadException()

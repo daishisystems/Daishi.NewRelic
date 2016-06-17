@@ -22,10 +22,8 @@ namespace Daishi.NewRelic.Insights.SampleApp.Areas.HelpPage
         private const string ParameterExpression = "param[@name='{0}']";
         private readonly XPathNavigator _documentNavigator;
 
-        /// <summary>
-        ///     Initializes a new instance of the
-        ///     <see cref="XmlDocumentationProvider" /> class.
-        /// </summary>
+        /// <summary>Initializes a new instance of the
+        ///     <see cref="XmlDocumentationProvider" /> class.</summary>
         /// <param name="documentPath">The physical path to XML document.</param>
         public XmlDocumentationProvider(string documentPath)
         {

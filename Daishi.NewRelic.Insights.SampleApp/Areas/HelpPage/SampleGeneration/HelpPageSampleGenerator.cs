@@ -18,10 +18,8 @@ namespace Daishi.NewRelic.Insights.SampleApp.Areas.HelpPage
     /// <summary>This class will generate the samples for the help page.</summary>
     public class HelpPageSampleGenerator
     {
-        /// <summary>
-        ///     Initializes a new instance of the
-        ///     <see cref="HelpPageSampleGenerator" /> class.
-        /// </summary>
+        /// <summary>Initializes a new instance of the
+        ///     <see cref="HelpPageSampleGenerator" /> class.</summary>
         public HelpPageSampleGenerator()
         {
             ActualHttpMessageTypes = new Dictionary<HelpPageSampleKey, Type>();
@@ -33,10 +31,8 @@ namespace Daishi.NewRelic.Insights.SampleApp.Areas.HelpPage
             };
         }
 
-        /// <summary>
-        ///     Gets CLR types that are used as the content of
-        ///     <see cref="HttpRequestMessage" /> or <see cref="HttpResponseMessage" />.
-        /// </summary>
+        /// <summary>Gets CLR types that are used as the content of
+        ///     <see cref="HttpRequestMessage" /> or <see cref="HttpResponseMessage" />.</summary>
         public IDictionary<HelpPageSampleKey, Type> ActualHttpMessageTypes { get; internal set; }
 
         /// <summary>
@@ -67,10 +63,8 @@ namespace Daishi.NewRelic.Insights.SampleApp.Areas.HelpPage
             Justification = "This is an appropriate nesting of generic types")]
         public IList<Func<HelpPageSampleGenerator, Type, object>> SampleObjectFactories { get; }
 
-        /// <summary>
-        ///     Gets the request body samples for a given
-        ///     <see cref="ApiDescription" />.
-        /// </summary>
+        /// <summary>Gets the request body samples for a given
+        ///     <see cref="ApiDescription" />.</summary>
         /// <param name="api">The <see cref="ApiDescription" />.</param>
         /// <returns>The samples keyed by media type.</returns>
         public IDictionary<MediaTypeHeaderValue, object> GetSampleRequests(ApiDescription api)
@@ -78,10 +72,8 @@ namespace Daishi.NewRelic.Insights.SampleApp.Areas.HelpPage
             return GetSample(api, SampleDirection.Request);
         }
 
-        /// <summary>
-        ///     Gets the response body samples for a given
-        ///     <see cref="ApiDescription" />.
-        /// </summary>
+        /// <summary>Gets the response body samples for a given
+        ///     <see cref="ApiDescription" />.</summary>
         /// <param name="api">The <see cref="ApiDescription" />.</param>
         /// <returns>The samples keyed by media type.</returns>
         public IDictionary<MediaTypeHeaderValue, object> GetSampleResponses(ApiDescription api)
@@ -236,11 +228,9 @@ namespace Daishi.NewRelic.Insights.SampleApp.Areas.HelpPage
             return sampleObject;
         }
 
-        /// <summary>
-        ///     Resolves the actual type of
+        /// <summary>Resolves the actual type of
         ///     <see cref="System.Net.Http.ObjectContent{T}" /> passed to the
-        ///     <see cref="System.Net.Http.HttpRequestMessage" /> in an action.
-        /// </summary>
+        ///     <see cref="System.Net.Http.HttpRequestMessage" /> in an action.</summary>
         /// <param name="api">The <see cref="ApiDescription" />.</param>
         /// <returns>The type.</returns>
         public virtual Type ResolveHttpRequestMessageType(ApiDescription api)

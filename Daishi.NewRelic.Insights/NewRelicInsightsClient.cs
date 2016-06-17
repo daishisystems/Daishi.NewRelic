@@ -687,8 +687,8 @@ using System.Threading.Tasks;
 using FluentScheduler;
 using Jil;
 
-// ToDo: Add Nuget package
 // ToDo: Change BlackListClient to leverage an instance of metadata class.
+// ToDo: Provide an IsRunning property that ensures that jobs don't overlap.
 
 namespace Daishi.NewRelic.Insights
 {

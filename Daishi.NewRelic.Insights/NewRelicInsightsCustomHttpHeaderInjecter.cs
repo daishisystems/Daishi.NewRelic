@@ -720,7 +720,7 @@ namespace Daishi.NewRelic.Insights
             if (apiKeyIsAdded) return true;
 
             newRelicInsightsMetadataException = new NewRelicInsightsMetadataException(
-                "The New Relic Insights API key does not conform to a valid HTTP header format.");
+                "The New Relic Insights header-name, or API key does not conform to a valid HTTP header format.");
 
             return false;
         }
