@@ -17,9 +17,9 @@ namespace Daishi.NewRelic.Insights.SampleApp
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
 
-            NewRelicInsightsClient.Instance.NewRelicInsightsMetadata.AccountID = "646832";
+            NewRelicInsightsClient.Instance.NewRelicInsightsMetadata.AccountID = "{New Relic Account ID}";
             NewRelicInsightsClient.Instance.NewRelicInsightsMetadata.APIKey =
-                "bx97bcRZ0nVQSb80O5GcVtyYREbQLNSz";
+                "{New Relic API key}";
             NewRelicInsightsClient.Instance.NewRelicInsightsMetadata.URI =
                 new Uri("https://insights-collector.newrelic.com/v1/accounts");
 
