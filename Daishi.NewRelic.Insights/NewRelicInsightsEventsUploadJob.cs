@@ -690,7 +690,7 @@ namespace Daishi.NewRelic.Insights
     {
         private readonly object _lock = new object();
 
-        private bool _shuttingDown;
+        private volatile bool _shuttingDown;
 
         /// <summary>
         ///     <see cref="Execute" /> invokes a process that uploads cached

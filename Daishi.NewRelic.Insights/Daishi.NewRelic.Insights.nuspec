@@ -9,10 +9,10 @@
     <licenseUrl>https://www.dropbox.com/s/pqhl1bj6xxxs2cf/License.txt?dl=0</licenseUrl>
     <projectUrl>https://github.com/daishisystems/Daishi.NewRelic</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>New Relic Tools for .NET is an unobtrusive service, designed to run as a background task in ASP.NET, or Windows applications.</description>
+    <description>New Relic Tools for .NET is an unobtrusive New Relic logging-service, designed to run as a background task in ASP.NET, or Windows applications. It currently supports New Relic Insights, is fully asynchronous, and proxy-aware.</description>
     <summary>New Relic Tools for .NET provides features such as uploading events to New Relic Insights on-the-fly, as well as caching events for background batch-upload, at regular intervals. It consumes a single thread only, to facilitate "silent-upload" mode, and can be restricted in terms of its maximum memory-footprint size.</summary>
     <releaseNotes>Added serializable attributes to custom exceptions, and removed unnecessary references.</releaseNotes>
-    <copyright>Copyright 2016</copyright>
+    <copyright>Copyright (C) 2016 Paul Mooney</copyright>
     <tags>New Relic Insights Tools .NET</tags>
   </metadata>
 </package>
