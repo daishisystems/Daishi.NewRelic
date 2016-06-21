@@ -680,8 +680,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Daishi.NewRelic.Insights.Tests
 {
-    // ToDo: I may have assigned "IsInstanceOf" in Aegis, whereas I should have leveraged ISNotNull.
-
     /// <summary>
     ///     <see cref="NewRelicInsightsCustomHttpHeaderInjecterTests" /> ensures that
     ///     logic pertaining to <see cref="NewRelicInsightsCustomHttpHeaderInjecter" />

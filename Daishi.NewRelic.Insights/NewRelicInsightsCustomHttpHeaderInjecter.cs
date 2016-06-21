@@ -679,8 +679,6 @@ using System.Net.Http.Headers;
 
 namespace Daishi.NewRelic.Insights
 {
-    //ToDo: Move this into a generic HTTP-helper style project.
-
     /// <summary>
     ///     <see cref="NewRelicInsightsCustomHttpHeaderInjecter" />" /> provides a
     ///     means of injecting New Relic Insights API key metadata into a HTTP request
