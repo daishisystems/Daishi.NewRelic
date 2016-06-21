@@ -675,6 +675,7 @@ Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
 */
 
+using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Daishi.NewRelic.Insights.Tests
@@ -789,6 +790,23 @@ namespace Daishi.NewRelic.Insights.Tests
             NewRelicInsightsClient.Instance.CacheUploadLimit = -1;
 
             Assert.AreEqual(1000, NewRelicInsightsClient.Instance.CacheUploadLimit);
+        }
+
+        [TestMethod]
+        public void NewRelicInsightsEventsUploadJobExceptionsArePublished()
+        {
+            NewRelicInsightsClient.Instance.NewRelicInsightsEventsUploadException +=
+                OnNewRelicInsightsEventsUploadException;
+
+            NewRelicInsightsClient
+                .Instance
+                .AddNewRelicInsightsEventsUploadException(new Exception("TEST"));
+        }
+
+        private void OnNewRelicInsightsEventsUploadException(object sender,
+            NewRelicInsightsEventsUploadExceptionEventArgs e)
+        {
+            Assert.AreEqual("TEST", e.Exception.Message);
         }
     }
 }

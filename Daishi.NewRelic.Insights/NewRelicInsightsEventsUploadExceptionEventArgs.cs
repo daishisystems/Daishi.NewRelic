@@ -676,72 +676,24 @@ Public License instead of this License.  But first, please read
 */
 
 using System;
-using System.Web.Hosting;
-using FluentScheduler;
 
 namespace Daishi.NewRelic.Insights
 {
     /// <summary>
-    ///     <see cref="NewRelicInsightsEventsUploadJob" /> is a recurring task that
-    ///     continously uploads <see cref="NewRelicInsightsEvent" />
-    ///     instances to New Relic Insights.
+    ///     <see cref="NewRelicInsightsEventsUploadExceptionEventArgs" /> retains
+    ///     <see cref="Exception" /> metadata to be published to subscribers.
     /// </summary>
-    internal class NewRelicInsightsEventsUploadJob : IJob, IRegisteredObject
+    public class NewRelicInsightsEventsUploadExceptionEventArgs : EventArgs
     {
-        private readonly object _lock = new object();
-
-        private volatile bool _shuttingDown;
-
-        public NewRelicInsightsEventsUploadJob()
+        public NewRelicInsightsEventsUploadExceptionEventArgs(Exception exception)
         {
-            HostingEnvironment.RegisterObject(this);
+            Exception = exception;
         }
 
         /// <summary>
-        ///     <see cref="Execute" /> invokes a process that uploads cached
-        ///     <see cref="NewRelicInsightsEvent" />
-        ///     instances to New Relic Insights.
+        ///     <see cref="Exception" /> is the underlying <see cref="Exception" />
+        ///     retained by this instance.
         /// </summary>
-        public void Execute()
-        {
-            lock (_lock)
-            {
-                if (_shuttingDown)
-                    return;
-
-                try
-                {
-                    var newRelicInsightsEvents =
-                        NewRelicInsightsEventExtractor.ExtractNewRelicInsightsEvents(
-                            NewRelicInsightsClient.Instance.NewRelicInsightsEvents,
-                            NewRelicInsightsClient.Instance.CacheUploadLimit);
-
-                    NewRelicInsightsClient.UploadEvents(newRelicInsightsEvents,
-                        new HttpClientFactory(),
-                        NewRelicInsightsClient.Instance.NewRelicInsightsMetadata);
-                }
-                catch (Exception exception)
-                {
-                    NewRelicInsightsClient
-                        .Instance
-                        .AddNewRelicInsightsEventsUploadException(exception);
-                }
-            }
-        }
-
-        /// <summary>Requests a registered object to unregister.</summary>
-        /// <param name="immediate">
-        ///     true to indicate the registered object should
-        ///     unregister from the hosting environment before returning; otherwise, false.
-        /// </param>
-        public void Stop(bool immediate)
-        {
-            lock (_lock)
-            {
-                _shuttingDown = true;
-            }
-
-            HostingEnvironment.UnregisterObject(this);
-        }
+        public Exception Exception { get; set; }
     }
 }

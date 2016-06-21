@@ -699,6 +699,9 @@ namespace Daishi.NewRelic.Insights
     /// </summary>
     public class NewRelicInsightsClient
     {
+        public delegate void NewRelicInsightsEventsUploadEventHandler(
+            object sender, NewRelicInsightsEventsUploadExceptionEventArgs e);
+
         private int _cacheUploadLimit;
         private volatile bool _hasStarted;
         private int _recurringTaskInterval;
@@ -775,6 +778,13 @@ namespace Daishi.NewRelic.Insights
         public NewRelicInsightsMetadata NewRelicInsightsMetadata { get; private set; }
 
         /// <summary>
+        ///     <see cref="NewRelicInsightsEventsUploadException" /> is invoked when a
+        ///     running <see cref="NewRelicInsightsEventsUploadJob" /> instance reports an
+        ///     <see cref="Exception" />.
+        /// </summary>
+        public event NewRelicInsightsEventsUploadEventHandler NewRelicInsightsEventsUploadException;
+
+        /// <summary>
         ///     <see cref="AddNewRelicInsightEvent" /> adds
         ///     <see cref="newRelicInsightsEvent" /> to
         ///     <see cref="NewRelicInsightsEvents" />.
@@ -806,7 +816,6 @@ namespace Daishi.NewRelic.Insights
         /// </summary>
         public void ShutDown()
         {
-            JobManager.RemoveJob(RecurringTaskName);
             _hasStarted = false;
         }
 
@@ -1026,6 +1035,38 @@ namespace Daishi.NewRelic.Insights
                         newRelicInsightsResponse.Message);
                 }
             }
+        }
+
+        /// <summary>
+        ///     <see cref="AddNewRelicInsightsEventsUploadException" /> adds
+        ///     <see cref="exception" /> to an instance of
+        ///     <see cref="NewRelicInsightsEventsUploadExceptionEventArgs" />, and
+        ///     publishes <see cref="NewRelicInsightsEventsUploadException" />.
+        /// </summary>
+        /// <param name="exception">The <see cref="Exception" /> to publish.</param>
+        /// <remarks>
+        ///     Clients should subscribe to
+        ///     <see cref="NewRelicInsightsEventsUploadException" /> in order to receive
+        ///     <see cref="Exception" /> instances reported by
+        ///     <see cref="NewRelicInsightsEventsUploadJob" /> instances.
+        /// </remarks>
+        public void AddNewRelicInsightsEventsUploadException(Exception exception)
+        {
+            OnNewRelicInsightsEventsUploadException(
+                new NewRelicInsightsEventsUploadExceptionEventArgs(exception));
+        }
+
+        /// <summary>
+        ///     <see cref="OnNewRelicInsightsEventsUploadException" /> invokes the
+        ///     <see cref="NewRelicInsightsEventsUploadException" /> event.
+        /// </summary>
+        /// <param name="e">
+        ///     <see cref="Exception" /> metadata to be published to subscribers.
+        /// </param>
+        protected virtual void OnNewRelicInsightsEventsUploadException(
+            NewRelicInsightsEventsUploadExceptionEventArgs e)
+        {
+            NewRelicInsightsEventsUploadException?.Invoke(this, e);
         }
     }
 }
