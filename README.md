@@ -1,4 +1,4 @@
-<a href="http://insidethecpu.com">![Image of insidethecpu](https://insidethecpu.files.wordpress.com/2016/06/daishi-systems-icon-with-text-really-tiny-with-photo1.png)</a>
+<a href="https://insidethecpu.com/2016/07/22/new-relic-insights-net-client/">![Image of insidethecpu](https://insidethecpu.files.wordpress.com/2016/06/daishi-systems-icon-with-text-really-tiny-with-photo1.png)</a>
 # New Relic Insights .NET Client
 ## A lightweight C# client for New Relic Insights	
 [![Join the chat at https://gitter.im/daishisystems/Daishi.NewRelic](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/daishisystems/Daishi.NewRelic?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
