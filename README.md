@@ -5,16 +5,14 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/ly3h4f406u5332n3?svg=true)](https://ci.appveyor.com/project/daishisystems/daishi-newrelic)
 [![NuGet](https://img.shields.io/badge/nuget-v1.0.2-blue.svg)](https://www.nuget.org/packages/Daishi.NewRelic)
 
-Upload New Relic Insights events on-demand
-Upload in batches, as a scheduled task
-Minimal CPU usage (1 thread)
-Proxy-aware
+* *Upload New Relic Insights events on-demand*
+* *Upload in batches, as a scheduled task*
+* *Minimal CPU usage (1 thread)*
+* *Proxy-aware*
 
 #Upload a Single Event
-
 ##Create the Event
 Create a class that implements NewRelicInsightsEvent:
-
 ```cs
 public class CustomNewRelicInsightsEvent : NewRelicInsightsEvent
 {
