@@ -1,4 +1,4 @@
-﻿/* License
+/* License
                     GNU GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
 
@@ -676,72 +676,135 @@ Public License instead of this License.  But first, please read
 */
 
 using System;
-using System.Web.Hosting;
-using FluentScheduler;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Daishi.NewRelic.Insights
 {
-    /// <summary>
-    ///     <see cref="NewRelicInsightsEventsUploadJob" /> is a recurring task that
-    ///     continously uploads <see cref="NewRelicInsightsEvent" />
-    ///     instances to New Relic Insights.
-    /// </summary>
-    internal class NewRelicInsightsEventsUploadJob : IJob, IRegisteredObject
+    public interface INewRelicInsightsClient
     {
-        private readonly object _lock = new object();
-
-        private volatile bool _shuttingDown;
-
-        public NewRelicInsightsEventsUploadJob()
-        {
-            HostingEnvironment.RegisterObject(this);
-        }
+        /// <summary>
+        ///     <see cref="NewRelicInsightsEvents" /> is a collection of
+        ///     <see cref="NewRelicInsightsEvent" /> instances.
+        /// </summary>
+        ConcurrentQueue<NewRelicInsightsEvent> NewRelicInsightsEvents { get; }
 
         /// <summary>
-        ///     <see cref="Execute" /> invokes a process that uploads cached
+        ///     <see cref="HasStarted" /> returns <c>true</c> if the recurring upload job
+        ///     has started.
+        /// </summary>
+        bool HasStarted { get; }
+
+        /// <summary>
+        ///     <see cref="RecurringTaskName" /> is the friendly name assigned to the
+        ///     recurring task that continously uploads
+        ///     <see cref="NewRelicInsightsEvent" /> instances to New Relic Insights.
+        /// </summary>
+        /// <remarks>A default name is assigned, if one is not specified.</remarks>
+        string RecurringTaskName { get; set; }
+
+        /// <summary>
+        ///     <see cref="RecurringTaskInterval" /> is the interval at which the recurring
+        ///     task that continously uploads <see cref="NewRelicInsightsEvent" />
+        ///     instances to New Relic Insights is executed.
+        /// </summary>
+        /// <remarks>A default interval is provided, if one is not specified.</remarks>
+        int RecurringTaskInterval { get; set; }
+
+        /// <summary>
+        ///     <see cref="CacheUploadLimit" /> is the maximum numner of
+        ///     <see cref="NewRelicInsightsEvent" /> instances that will be removed and
+        ///     uploaded during the recurring upload job.
+        /// </summary>
+        /// <remarks>A default limit is provided, if one is not specified.</remarks>
+        int CacheUploadLimit { get; set; }
+
+        /// <summary>
+        ///     <see cref="NewRelicInsightsMetadata" /> is a template that contains
+        ///     properties that pertain to a New Relic Insights event, as well as New Relic
+        ///     Insights connection-specific properties, such as URI, proxy, etc.
+        /// </summary>
+        NewRelicInsightsMetadata NewRelicInsightsMetadata { get; }
+
+        /// <summary>
+        ///     <see cref="NewRelicInsightsClient.NewRelicInsightsEventsUploadException" /> is invoked when a
+        ///     running <see cref="NewRelicInsightsEventsUploadJob" /> instance reports an
+        ///     <see cref="Exception" />.
+        /// </summary>
+        event NewRelicInsightsClient.NewRelicInsightsEventsUploadEventHandler NewRelicInsightsEventsUploadException;
+
+        /// <summary>
+        ///     <see cref="NewRelicInsightsClient.AddNewRelicInsightEvent" /> adds
+        ///     <see cref="newRelicInsightsEvent" /> to
+        ///     <see cref="NewRelicInsightsClient.NewRelicInsightsEvents" />.
+        /// </summary>
+        /// <param name="newRelicInsightsEvent">
+        ///     The <see cref="NewRelicInsightsEvent" /> to
+        ///     be added to <see cref="NewRelicInsightsClient.NewRelicInsightsEvents" />.
+        /// </param>
+        void AddNewRelicInsightEvent(NewRelicInsightsEvent newRelicInsightsEvent);
+
+        /// <summary>
+        ///     <see cref="NewRelicInsightsClient.Initialise" /> begins a recurring task that continuously uploads
         ///     <see cref="NewRelicInsightsEvent" />
         ///     instances to New Relic Insights.
         /// </summary>
-        public void Execute()
-        {
-            lock (_lock)
-            {
-                if (_shuttingDown)
-                    return;
+        void Initialise();
 
-                try
-                {
-                    var newRelicInsightsEvents =
-                        NewRelicInsightsEventExtractor.ExtractNewRelicInsightsEvents(
-                            NewRelicInsightsClient.Instance.NewRelicInsightsEvents,
-                            NewRelicInsightsClient.Instance.CacheUploadLimit);
+        /// <summary>
+        ///     <see cref="NewRelicInsightsClient.ShutDown" /> stops the recurring task that continuously uploads
+        ///     <see cref="NewRelicInsightsEvent" />
+        ///     instances to New Relic Insights.
+        /// </summary>
+        void ShutDown();
 
-                    NewRelicInsightsClient.Instance.UploadEvents(
-                        newRelicInsightsEvents,
-                        new HttpClientFactory());
-                }
-                catch (Exception exception)
-                {
-                    NewRelicInsightsClient
-                        .Instance
-                        .AddNewRelicInsightsEventsUploadException(exception);
-                }
-            }
-        }
-
-        /// <summary>Requests a registered object to unregister.</summary>
-        /// <param name="immediate">
-        ///     true to indicate the registered object should
-        ///     unregister from the hosting environment before returning; otherwise, false.
+        /// <summary>
+        ///     <see cref="NewRelicInsightsClient.UploadEvents" /> uploads
+        ///     <see cref="newRelicInsightsEvents" /> to New Relic Insights, as a single
+        ///     batch of multiple <see cref="NewRelicInsightsEvent" /> instances.
+        /// </summary>
+        /// <param name="newRelicInsightsEvents">
+        ///     The <see cref="NewRelicInsightsEvent" />
+        ///     instances to upload.
         /// </param>
-        public void Stop(bool immediate)
-        {
-            lock (_lock)
-            {
-                _shuttingDown = true;
-            }
+        /// <param name="httpClientFactory">
+        ///     A factory that creates
+        ///     <see cref="HttpClient" /> instances.
+        /// </param>
+        /// <remarks>
+        ///     Throws the following <see cref="Exception" /> instances:
+        ///     <para>
+        ///         <see cref="NewRelicInsightsMetadataException" />
+        ///     </para>
+        ///     <para>
+        ///         <see cref="NewRelicInsightsEventUploadException" />
+        ///     </para>
+        /// </remarks>
+        void UploadEvents(IEnumerable<NewRelicInsightsEvent> newRelicInsightsEvents,
+                                          HttpClientFactory httpClientFactory);
 
-            HostingEnvironment.UnregisterObject(this);
-        }
+        /// <summary>Asynchronous equivalent of <see cref="NewRelicInsightsClient.UploadEvents" />.</summary>
+        /// <param name="newRelicInsightsEvents">See <see cref="NewRelicInsightsClient.UploadEvents" />.</param>
+        /// <param name="httpClientFactory">See <see cref="NewRelicInsightsClient.UploadEvents" />.</param>
+        /// <returns>See <see cref="NewRelicInsightsClient.UploadEvents" />.</returns>
+        Task UploadEventsAsync(
+            IEnumerable<NewRelicInsightsEvent> newRelicInsightsEvents,
+            HttpClientFactory httpClientFactory);
+
+        /// <summary>
+        ///     <see cref="NewRelicInsightsClient.AddNewRelicInsightsEventsUploadException" /> adds
+        ///     <see cref="exception" /> to an instance of
+        ///     <see cref="NewRelicInsightsEventsUploadExceptionEventArgs" />, and
+        ///     publishes <see cref="NewRelicInsightsClient.NewRelicInsightsEventsUploadException" />.
+        /// </summary>
+        /// <param name="exception">The <see cref="Exception" /> to publish.</param>
+        /// <remarks>
+        ///     Clients should subscribe to
+        ///     <see cref="NewRelicInsightsClient.NewRelicInsightsEventsUploadException" /> in order to receive
+        ///     <see cref="Exception" /> instances reported by
+        ///     <see cref="NewRelicInsightsEventsUploadJob" /> instances.
+        /// </remarks>
+        void AddNewRelicInsightsEventsUploadException(Exception exception);
     }
 }

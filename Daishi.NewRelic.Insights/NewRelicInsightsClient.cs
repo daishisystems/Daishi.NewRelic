@@ -694,7 +694,7 @@ namespace Daishi.NewRelic.Insights
     ///     <para>Batch-upload of New Relic Insights events</para>
     ///     <para>New Relic Insight event caching, and recurring-upload</para>
     /// </summary>
-    public class NewRelicInsightsClient
+    public class NewRelicInsightsClient : INewRelicInsightsClient
     {
         public delegate void NewRelicInsightsEventsUploadEventHandler(
             object sender, NewRelicInsightsEventsUploadExceptionEventArgs e);
@@ -704,18 +704,13 @@ namespace Daishi.NewRelic.Insights
         private int _recurringTaskInterval;
         private string _recurringTaskName;
 
-        static NewRelicInsightsClient()
-        {
-
-        }
-
         private NewRelicInsightsClient()
         {
             NewRelicInsightsEvents = new ConcurrentQueue<NewRelicInsightsEvent>();
             NewRelicInsightsMetadata = new NewRelicInsightsMetadata();
         }
 
-        public static NewRelicInsightsClient Instance { get; } = new NewRelicInsightsClient();
+        public static INewRelicInsightsClient Instance { get; } = new NewRelicInsightsClient();
 
         /// <summary>
         ///     <see cref="NewRelicInsightsEvents" /> is a collection of
@@ -796,7 +791,7 @@ namespace Daishi.NewRelic.Insights
         }
 
         /// <summary>
-        ///     <see cref="Initialise" /> begins a recurring task that continously uploads
+        ///     <see cref="Initialise" /> begins a recurring task that continuously uploads
         ///     <see cref="NewRelicInsightsEvent" />
         ///     instances to New Relic Insights.
         /// </summary>
@@ -807,7 +802,7 @@ namespace Daishi.NewRelic.Insights
         }
 
         /// <summary>
-        ///     <see cref="ShutDown" /> stops the recurring task that continously uploads
+        ///     <see cref="ShutDown" /> stops the recurring task that continuously uploads
         ///     <see cref="NewRelicInsightsEvent" />
         ///     instances to New Relic Insights.
         /// </summary>
@@ -829,10 +824,6 @@ namespace Daishi.NewRelic.Insights
         ///     A factory that creates
         ///     <see cref="HttpClient" /> instances.
         /// </param>
-        /// <param name="newRelicInsightsMetadata">
-        ///     Metadata pertaining to a New Relic
-        ///     Insights HTTP connection.
-        /// </param>
         /// <remarks>
         ///     Throws the following <see cref="Exception" /> instances:
         ///     <para>
@@ -842,9 +833,8 @@ namespace Daishi.NewRelic.Insights
         ///         <see cref="NewRelicInsightsEventUploadException" />
         ///     </para>
         /// </remarks>
-        public static void UploadEvents(IEnumerable<NewRelicInsightsEvent> newRelicInsightsEvents,
-            HttpClientFactory httpClientFactory,
-            NewRelicInsightsMetadata newRelicInsightsMetadata)
+        public void UploadEvents(IEnumerable<NewRelicInsightsEvent> newRelicInsightsEvents,
+            HttpClientFactory httpClientFactory)
         {
             if (newRelicInsightsEvents == null || !newRelicInsightsEvents.Any())
             {
@@ -854,7 +844,7 @@ namespace Daishi.NewRelic.Insights
             NewRelicInsightsMetadataException newRelicInsightsMetadataException;
 
             var newRelicInsightsMetadataIsValid =
-                NewRelicInsightsMetadataValidator.TryValidate(newRelicInsightsMetadata,
+                NewRelicInsightsMetadataValidator.TryValidate(NewRelicInsightsMetadata,
                     out newRelicInsightsMetadataException);
 
             if (!newRelicInsightsMetadataIsValid)
@@ -864,7 +854,7 @@ namespace Daishi.NewRelic.Insights
 
             HttpClientHandler httpClientHandler;
 
-            using (var httpClient = httpClientFactory.Create(newRelicInsightsMetadata,
+            using (var httpClient = httpClientFactory.Create(NewRelicInsightsMetadata,
                 out httpClientHandler))
             {
                 httpClient.DefaultRequestHeaders.Accept.Clear();
@@ -874,7 +864,7 @@ namespace Daishi.NewRelic.Insights
 
                 var apiKeyHeaderIsAdded = NewRelicInsightsCustomHttpHeaderInjecter.TryInjectAPIKey(
                     "X-Insert-Key",
-                    newRelicInsightsMetadata.APIKey,
+                    NewRelicInsightsMetadata.APIKey,
                     httpClient.DefaultRequestHeaders,
                     out newRelicInsightsMetadataException);
 
@@ -891,8 +881,8 @@ namespace Daishi.NewRelic.Insights
 
                         httpResponseMessage = httpClient.PostAsync(
                             string.Concat(
-                                newRelicInsightsMetadata.URI, "/",
-                                newRelicInsightsMetadata.AccountID,
+                                NewRelicInsightsMetadata.URI, "/",
+                                NewRelicInsightsMetadata.AccountID,
                                 "/events"),
                             new StringContent(
                                 stringWriter.ToString(),
@@ -938,12 +928,10 @@ namespace Daishi.NewRelic.Insights
         /// <summary>Asynchronous equivalent of <see cref="UploadEvents" />.</summary>
         /// <param name="newRelicInsightsEvents">See <see cref="UploadEvents" />.</param>
         /// <param name="httpClientFactory">See <see cref="UploadEvents" />.</param>
-        /// <param name="newRelicInsightsMetadata">See <see cref="UploadEvents" />.</param>
         /// <returns>See <see cref="UploadEvents" />.</returns>
-        public static async Task UploadEventsAsync(
+        public async Task UploadEventsAsync(
             IEnumerable<NewRelicInsightsEvent> newRelicInsightsEvents,
-            HttpClientFactory httpClientFactory,
-            NewRelicInsightsMetadata newRelicInsightsMetadata)
+            HttpClientFactory httpClientFactory)
         {
             if (newRelicInsightsEvents == null || !newRelicInsightsEvents.Any())
             {
@@ -953,7 +941,7 @@ namespace Daishi.NewRelic.Insights
             NewRelicInsightsMetadataException newRelicInsightsMetadataException;
 
             var newRelicInsightsMetadataIsValid =
-                NewRelicInsightsMetadataValidator.TryValidate(newRelicInsightsMetadata,
+                NewRelicInsightsMetadataValidator.TryValidate(NewRelicInsightsMetadata,
                     out newRelicInsightsMetadataException);
 
             if (!newRelicInsightsMetadataIsValid)
@@ -963,7 +951,7 @@ namespace Daishi.NewRelic.Insights
 
             HttpClientHandler httpClientHandler;
 
-            using (var httpClient = httpClientFactory.Create(newRelicInsightsMetadata,
+            using (var httpClient = httpClientFactory.Create(NewRelicInsightsMetadata,
                 out httpClientHandler))
             {
                 httpClient.DefaultRequestHeaders.Accept.Clear();
@@ -973,7 +961,7 @@ namespace Daishi.NewRelic.Insights
 
                 var apiKeyHeaderIsAdded = NewRelicInsightsCustomHttpHeaderInjecter.TryInjectAPIKey(
                     "X-Insert-Key",
-                    newRelicInsightsMetadata.APIKey,
+                    NewRelicInsightsMetadata.APIKey,
                     httpClient.DefaultRequestHeaders,
                     out newRelicInsightsMetadataException);
 
@@ -990,8 +978,8 @@ namespace Daishi.NewRelic.Insights
 
                         httpResponseMessage = await httpClient.PostAsync(
                             string.Concat(
-                                newRelicInsightsMetadata.URI, "/",
-                                newRelicInsightsMetadata.AccountID,
+                                NewRelicInsightsMetadata.URI, "/",
+                                NewRelicInsightsMetadata.AccountID,
                                 "/events"),
                             new StringContent(
                                 stringWriter.ToString(),
