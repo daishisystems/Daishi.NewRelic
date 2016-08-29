@@ -71,23 +71,21 @@ var customNewRelicInsightsEvent = new CustomNewRelicInsightsEvent
 ```    
 ###Synchronously
 ```cs
-NewRelicInsightsClient.UploadEvents(
+NewRelicInsightsClient.Instance.UploadEvents(
 	new NewRelicInsightsEvent[]
 	{ 
 		customNewRelicInsightsEvent 
 	}, 
-	new HttpClientFactory(), 
-	NewRelicInsightsClient.Instance.NewRelicInsightsMetadata);
+	new HttpClientFactory());
 ```
 ###Asynchronously
 ```cs
-NewRelicInsightsClient.UploadEventsAsync(
+NewRelicInsightsClient.Instance.UploadEventsAsync(
 	new NewRelicInsightsEvent[]
 	{ 
 		customNewRelicInsightsEvent 
 	}, 
-	new HttpClientFactory(), 
-	NewRelicInsightsClient.Instance.NewRelicInsightsMetadata);
+	new HttpClientFactory());
 ```
 #Upload Events in Batches
 ![Batch Event Upload Animation](https://dl.dropboxusercontent.com/u/26042707/New%20Relic%20Batch%20Upload.gif)
