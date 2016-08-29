@@ -681,7 +681,7 @@ using System.Collections.Generic;
 namespace Daishi.NewRelic.Insights
 {
     /// <summary>
-    ///     <see cref="NewRelicInsightsEventExtractor" /> provides a means of extracing
+    ///     <see cref="NewRelicInsightsEventExtractor" /> provides a means of extracting
     ///     <see cref="NewRelicInsightsEvent" /> instances from a cache of
     ///     <see cref="NewRelicInsightsEvent" /> instances.
     /// </summary>
