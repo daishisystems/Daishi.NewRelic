@@ -747,7 +747,7 @@ namespace Daishi.NewRelic.Insights
         /// </summary>
         /// <remarks>A default interval is provided, if one is not specified.</remarks>
         public int RecurringTaskInterval {
-            get { return _recurringTaskInterval > 0 ? _recurringTaskInterval : 1; }
+            get { return _recurringTaskInterval > 0 ? _recurringTaskInterval : 5; }
             set { _recurringTaskInterval = value; }
         }
 
@@ -877,7 +877,7 @@ namespace Daishi.NewRelic.Insights
                 {
                     try
                     {
-                        JSON.SerializeDynamic(newRelicInsightsEvents, stringWriter);
+                        JSON.SerializeDynamic(newRelicInsightsEvents, stringWriter, Options.IncludeInherited);
 
                         httpResponseMessage = httpClient.PostAsync(
                             string.Concat(
@@ -919,6 +919,7 @@ namespace Daishi.NewRelic.Insights
 
                 if (!newRelicInsightsResponse.Success)
                 {
+                    httpResponseMessage.Content?.Dispose();
                     throw new UnableToParseNewRelicInsightsResponseException(
                         newRelicInsightsResponse.Message);
                 }
@@ -974,7 +975,7 @@ namespace Daishi.NewRelic.Insights
                 {
                     try
                     {
-                        JSON.SerializeDynamic(newRelicInsightsEvents, stringWriter);
+                        JSON.SerializeDynamic(newRelicInsightsEvents, stringWriter, Options.IncludeInherited);
 
                         httpResponseMessage = await httpClient.PostAsync(
                             string.Concat(

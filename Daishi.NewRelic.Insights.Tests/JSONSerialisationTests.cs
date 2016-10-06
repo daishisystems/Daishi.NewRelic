@@ -703,7 +703,7 @@ namespace Daishi.NewRelic.Insights.Tests
 
             using (var stringWriter = new StringWriter())
             {
-                JSON.Serialize(dummyNewRelicInsightsEvent, stringWriter);
+                JSON.Serialize(dummyNewRelicInsightsEvent, stringWriter, Options.IncludeInherited);
 
                 var serialisedMetadata = stringWriter.ToString();
 

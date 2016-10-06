@@ -711,6 +711,11 @@ namespace Daishi.NewRelic.Insights
 
                 try
                 {
+                    if (NewRelicInsightsClient.Instance.NewRelicInsightsEvents.IsEmpty)
+                    {
+                        return;
+                    }
+
                     var newRelicInsightsEvents =
                         NewRelicInsightsEventExtractor.ExtractNewRelicInsightsEvents(
                             NewRelicInsightsClient.Instance.NewRelicInsightsEvents,

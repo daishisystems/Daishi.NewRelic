@@ -722,7 +722,7 @@ namespace Daishi.NewRelic.Insights.Tests
         [TestMethod]
         public void DefaultRecurringTaskIntervalIsAssignedIfOneIsNotProvided()
         {
-            Assert.AreEqual(1, NewRelicInsightsClient.Instance.RecurringTaskInterval);
+            Assert.AreEqual(5, NewRelicInsightsClient.Instance.RecurringTaskInterval);
         }
 
         /// <summary>
