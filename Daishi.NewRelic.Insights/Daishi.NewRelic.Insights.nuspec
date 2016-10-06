@@ -2,11 +2,11 @@
 <package >
   <metadata>
     <id>Daishi.NewRelic</id>
-    <version>1.0.4</version>
+    <version>$version$</version>
     <title>New Relic Tools for .NET</title>
     <authors>Paul Mooney</authors>
     <owners>Paul Mooney</owners>
-    <licenseUrl>https://www.dropbox.com/s/pqhl1bj6xxxs2cf/License.txt?dl=0</licenseUrl>
+    <licenseUrl>http://www.gnu.org/licenses/gpl-3.0.txt</licenseUrl>
     <projectUrl>https://github.com/daishisystems/Daishi.NewRelic</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>New Relic Tools for .NET is an unobtrusive New Relic logging-service, designed to run as a background task in ASP.NET, or Windows applications. It supports New Relic Insights, is fully asynchronous, proxy-aware, and consumes minimal resources.</description>
