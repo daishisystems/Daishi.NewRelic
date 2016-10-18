@@ -793,6 +793,11 @@ namespace Daishi.NewRelic.Insights
             HttpClientFactory httpClientFactory);
 
         /// <summary>
+        /// Executes scheduled uploading job.
+        /// </summary>
+        void UploadAllCachedEvents();
+
+        /// <summary>
         ///     <see cref="NewRelicInsightsClient.AddNewRelicInsightsEventsUploadException" /> adds
         ///     <see cref="exception" /> to an instance of
         ///     <see cref="NewRelicInsightsEventsUploadExceptionEventArgs" />, and

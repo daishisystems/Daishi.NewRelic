@@ -703,6 +703,7 @@ namespace Daishi.NewRelic.Insights
         private volatile bool _hasStarted;
         private int _recurringTaskInterval;
         private string _recurringTaskName;
+        private static readonly object _initLock = new object();
 
         private NewRelicInsightsClient()
         {
@@ -734,7 +735,7 @@ namespace Daishi.NewRelic.Insights
             get
             {
                 return string.IsNullOrEmpty(_recurringTaskName)
-                    ? "UploadEvents"
+                    ? "Daishi.NewRelic.Insights:UploadEvents"
                     : _recurringTaskName;
             }
             set { _recurringTaskName = value; }
@@ -797,8 +798,16 @@ namespace Daishi.NewRelic.Insights
         /// </summary>
         public void Initialise()
         {
-            JobManager.Initialize(new NewRelicInsightsEventsUploadRegistry());
-            _hasStarted = true;
+            lock (_initLock)
+            {
+                if (_hasStarted)
+                {
+                    return;
+                }
+
+                JobManager.Initialize(new NewRelicInsightsEventsUploadRegistry());
+                _hasStarted = true;
+            }
         }
 
         /// <summary>
@@ -808,7 +817,16 @@ namespace Daishi.NewRelic.Insights
         /// </summary>
         public void ShutDown()
         {
-            _hasStarted = false;
+            lock (_initLock)
+            {
+                if (!_hasStarted)
+                {
+                    return;
+                }
+
+                JobManager.RemoveJob(RecurringTaskName);
+                _hasStarted = false;
+            }
         }
 
         /// <summary>
@@ -1021,6 +1039,14 @@ namespace Daishi.NewRelic.Insights
                         newRelicInsightsResponse.Message);
                 }
             }
+        }
+
+        /// <summary>
+        /// Executes scheduled uploading job.
+        /// </summary>
+        public void UploadAllCachedEvents()
+        {
+            JobManager.GetSchedule(RecurringTaskName)?.Execute();
         }
 
         /// <summary>

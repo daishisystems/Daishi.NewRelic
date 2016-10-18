@@ -710,7 +710,7 @@ namespace Daishi.NewRelic.Insights.Tests
         [TestMethod]
         public void DefaultRecurringTaskNameIsAssignedIfOneIsNotProvided()
         {
-            Assert.AreEqual("UploadEvents", NewRelicInsightsClient.Instance.RecurringTaskName);
+            Assert.AreEqual("Daishi.NewRelic.Insights:UploadEvents", NewRelicInsightsClient.Instance.RecurringTaskName);
         }
 
         /// <summary>
