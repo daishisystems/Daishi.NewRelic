@@ -10,8 +10,8 @@
 * *Minimal CPU usage (1 thread)*
 * *Proxy-aware*
 
-#Upload a Single Event
-##Create the Event
+# Upload a Single Event
+## Create the Event
 Create a class that implements NewRelicInsightsEvent:
 ```cs
 public class CustomNewRelicInsightsEvent : NewRelicInsightsEvent
@@ -52,14 +52,14 @@ public class CustomNewRelicInsightsEvent : NewRelicInsightsEvent
 
 Note: NewRelic.NET leverages Jil for serialisation. Though JilDirective attributes are not required for custom properties, the EventType property requires the specified JilDirective.
 
-##Initialise New Relic Metadata
+## Initialise New Relic Metadata
 ```cs
 NewRelicInsightsClient.Instance.NewRelicInsightsMetadata.AccountID = "{New Relic Account ID}";
 NewRelicInsightsClient.Instance.NewRelicInsightsMetadata.APIKey = "{New Relic API key}";
 NewRelicInsightsClient.Instance.NewRelicInsightsMetadata.URI = 
 	new Uri("https://insights-collector.newrelic.com/v1/accounts");
 ```
-##Upload the Event
+## Upload the Event
 ![Event Upload Animation](https://dl.dropboxusercontent.com/u/26042707/New%20Relic%20Event%20Upload.gif)
 ```cs
 var customNewRelicInsightsEvent = new CustomNewRelicInsightsEvent
@@ -69,7 +69,7 @@ var customNewRelicInsightsEvent = new CustomNewRelicInsightsEvent
    	EventType = "Test"
 };
 ```    
-###Synchronously
+### Synchronously
 ```cs
 NewRelicInsightsClient.Instance.UploadEvents(
 	new NewRelicInsightsEvent[]
@@ -78,7 +78,7 @@ NewRelicInsightsClient.Instance.UploadEvents(
 	}, 
 	new HttpClientFactory());
 ```
-###Asynchronously
+### Asynchronously
 ```cs
 NewRelicInsightsClient.Instance.UploadEventsAsync(
 	new NewRelicInsightsEvent[]
@@ -87,41 +87,41 @@ NewRelicInsightsClient.Instance.UploadEventsAsync(
 	}, 
 	new HttpClientFactory());
 ```
-#Upload Events in Batches
+# Upload Events in Batches
 ![Batch Event Upload Animation](https://dl.dropboxusercontent.com/u/26042707/New%20Relic%20Batch%20Upload.gif)
-##Start the Event Cache
+## Start the Event Cache
 ```cs
 if (!NewRelicInsightsClient.Instance.HasStarted)
 {
     NewRelicInsightsClient.Instance.Initialise();
 }
 ```
-##Add Events to the Cache
+## Add Events to the Cache
 ```cs
 NewRelicInsightsClient.Instance.AddNewRelicInsightEvent(customNewRelicInsightsEvent);
 ```
-###Event Upload Frequency
+### Event Upload Frequency
 Batch-upload occurs every minute, by default, unless a custom frequency is specified. The following example sets the upload-frequency to 10 minutes:
 ```cs
 NewRelicInsightsClient.Instance.RecurringTaskInterval = 10;
 ```
-###Proxy Server
+### Proxy Server
 The following example indicates that a proxy should be leveraged when invoking HTTP requests to New Relic:
 ```cs
 NewRelicInsightsClient.Instance.NewRelicInsightsMetadata.UseWebProxy = true;
 NewRelicInsightsClient.Instance.NewRelicInsightsMetadata.WebProxy = new WebProxy(“127.0.0.1:8080”);
 ```
-###Custom HTTP Timeout
+### Custom HTTP Timeout
 Outbound HTTP requests to NewRelic are restricted to a specific timeout (5 seconds) as follows:
 ```cs
 NewRelicInsightsClient.Instance.NewRelicInsightsMetadata.UseNonDefaultTimeout = true;
 NewRelicInsightsClient.Instance.NewRelicInsightsMetadata.NonDefaultTimeout = new TimeSpan(0,0,5);
 ```
 Otherwise, the default C# HttpClient-timeout applies.
-###Restricting Batch Upload Size
+### Restricting Batch Upload Size
 The default batch-upload size is 1,000 events. That is, a batch consisting of no more that 1,000 events will be uploaded upon each cache upload-cycle. The following example indicates that the entire cache should be emptied upon every upload-cycle:
 ```cs
 NewRelicInsightsClient.Instance.NewRelicInsightsMetadata.CacheUploadLimit = int.MaxValue;
 ```
-#Contact the Developer
+# Contact the Developer
 <a href="http://insidethecpu.com/feed/">![RSS](https://dl.dropboxusercontent.com/u/26042707/rss.png)</a><a href="https://twitter.com/daishisystems">![Twitter](https://dl.dropboxusercontent.com/u/26042707/twitter.png)</a><a href="https://www.linkedin.com/in/daishisystems">![LinkedIn](https://dl.dropboxusercontent.com/u/26042707/linkedin.png)</a><a href="https://plus.google.com/102806071104797194504/posts">![Google+](https://dl.dropboxusercontent.com/u/26042707/g.png)</a><a href="https://www.youtube.com/user/daishisystems">![YouTube](https://dl.dropboxusercontent.com/u/26042707/youtube.png)</a>
